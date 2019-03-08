@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>Sharding-JDBC介绍 | 赵波的技术博客</title>
+  <meta name="description" content="背景关系型数据库在大于一定数据量的情况下性能会急剧下降。在面对互联网海量数据的情况时,所有数据都存于一张表,显然很容易会达到数据表可承受的数据量阈值。单纯分表虽然可以解决数据量过大导致检索变慢的问题,但无法解决高并发情况下访问同一个库,导致数据库响应变慢的问题。所以通常水平拆分都至少要采用分库的方式,以一并解决大数据量&amp;amp;;高并发的问题。但分表也有不可替代的…">
+<meta name="keywords" content="Sharding-jdbc,ShardingSphere">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sharding-JDBC介绍">
+<meta property="og:url" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/index.html">
+<meta property="og:site_name" content="个人博客">
+<meta property="og:description" content="背景关系型数据库在大于一定数据量的情况下性能会急剧下降。在面对互联网海量数据的情况时,所有数据都存于一张表,显然很容易会达到数据表可承受的数据量阈值。单纯分表虽然可以解决数据量过大导致检索变慢的问题,但无法解决高并发情况下访问同一个库,导致数据库响应变慢的问题。所以通常水平拆分都至少要采用分库的方式,以一并解决大数据量&amp;amp;;高并发的问题。但分表也有不可替代的…">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/0d31edabc368a0bd0013de4cbc444232.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/5694af1f649eb968c9b09b28f35786b2.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/160de2ecdf238bfc2c16747a134503b0.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/9f82893a6a07f67ab9e1ffd24be3944a.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/0c74f2fcb2f32741003cb5d3220e2cb4.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/573dd74926e10ba8ea9bd37a733ed2cf.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/a157549e2138ad5f4916c003dfdf6af7.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/bd908653bc7fbfafa0cb3f6e0008549d.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/6a09bb8f8c0f2e7b738422c682bb5317.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/f98ce7ac4a8a04b63fb6be9d0a590bd3.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/181b542661a6a5baf11c5427e449e5ac.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/2390e88c9f9ce28cb01f7cbf0f37da13.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/95685342d67826bbf1f4ac0f6888a7eb.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/4eaf342b602a4546a49b9076a77bfada.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/30185fb378b04895fea07ce10c525db1.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/9392af4d59283516ab026a950d7acd35.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/5deff90bdc30ce72a6da990e92c93cfc.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/58e03fbd59f688b94bcc1acd4006492d.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/c99f1138113dc6c27ffd09dae267aa82.jpg">
+<meta property="og:updated_time" content="2019-01-21T10:02:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sharding-JDBC介绍">
+<meta name="twitter:description" content="背景关系型数据库在大于一定数据量的情况下性能会急剧下降。在面对互联网海量数据的情况时,所有数据都存于一张表,显然很容易会达到数据表可承受的数据量阈值。单纯分表虽然可以解决数据量过大导致检索变慢的问题,但无法解决高并发情况下访问同一个库,导致数据库响应变慢的问题。所以通常水平拆分都至少要采用分库的方式,以一并解决大数据量&amp;amp;;高并发的问题。但分表也有不可替代的…">
+<meta name="twitter:image" content="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/0d31edabc368a0bd0013de4cbc444232.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="个人博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center theme-purple" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="/" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">波哥</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> ChengDu, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/HttpClient/">HttpClient</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/I-O/">I/O</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java8/">Java8</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java并发/">Java并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/">Java技术</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/多线程/">多线程</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQ/">MQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NoSql/">NoSql</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-MVC/">Spring MVC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/">Spring源码深度解析</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/Spring/">Spring</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ribbon/">ribbon</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet/">servlet</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/">servlet3.0</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/spring-mvc/">spring mvc</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">32</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/Zookeeper/">Zookeeper</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程术语/">编程术语</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AES/">AES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AOP/">AOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AQS/">AQS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ApplicationEvent/">ApplicationEvent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ArrayList/">ArrayList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BOP/">BOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bean/">Bean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanDefinitionReader/">BeanDefinitionReader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanFactoryPostProcessor/">BeanFactoryPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanPostProcessor/">BeanPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Callable/">Callable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ComponentScan/">ComponentScan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Conditional/">Conditional</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DES/">DES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DI-DL/">DI/DL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FactoryBean/">FactoryBean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Future/">Future</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FutureTask/">FutureTask</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hash/">Hash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HttpURLConnection/">HttpURLConnection</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/">IOC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/InputStream/">InputStream</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LRU/">LRU</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Lazy-bean注解/">Lazy-bean注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LinkedList/">LinkedList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LockSupport/">LockSupport</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5withRSA/">MD5withRSA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5加密/">MD5加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-1/">O(1)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-log-n/">O(log n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-n/">O(n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertyPlaceholderConfigurer/">PropertyPlaceholderConfigurer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertySource，Environment，Profile/">PropertySource，Environment，Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantLock/">ReentrantLock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantReadWriteLock/">ReentrantReadWriteLock</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource/">Resource</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceBundle/">ResourceBundle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceLoader/">ResourceLoader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource接口/">Resource接口</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Semaphore/">Semaphore</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/">Sentinel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sharding-jdbc/">Sharding-jdbc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ShardingSphere/">ShardingSphere</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SkipList跳表/">SkipList跳表</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-事件机制/">Spring 事件机制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/System-arrayCopy/">System.arrayCopy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThreadLocal/">ThreadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Zookeeper/">Zookeeper</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/">annotation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/aop/">aop</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/available/">available</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cpu/">cpu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/feign/">feign</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/getEnv/">getEnv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ignoreDependencyInterface/">ignoreDependencyInterface</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupt/">interrupt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupted/">interrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/isInterrupted/">isInterrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java8/">java8</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javabean/">javabean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/join/">join</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pojo/">pojo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ribbon/">ribbon</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/servlet3-0/">servlet3.0</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sha1加密/">sha1加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spirng-Profile/">spirng Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Autowired/">spring Autowired</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Aware/">spring Aware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Configuration注解/">spring Configuration注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Import注解/">spring Import注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Primary/">spring Primary</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource原理/">spring PropertySource原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource注解/">spring PropertySource注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Qualifier/">spring Qualifier</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Scope注解/">spring Scope注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-mvc/">spring mvc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-value注解/">spring value注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-导图/">spring 导图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-生命周期/">spring-生命周期</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/threadLocal/">threadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/volatile/">volatile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/位运算/">位运算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/公钥和私钥/">公钥和私钥</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式锁/">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/占位符解析器/">占位符解析器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/国际化/">国际化</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步controller/">异步controller</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/强引用、软引用、弱引用、虚引用/">强引用、软引用、弱引用、虚引用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/熔断/">熔断</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程池/">线程池</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程通信/">线程通信</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式六大原则/">设计模式六大原则</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进制转换/">进制转换</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AES/" style="font-size: 13px;">AES</a> <a href="/tags/AOP/" style="font-size: 13px;">AOP</a> <a href="/tags/AQS/" style="font-size: 13px;">AQS</a> <a href="/tags/ApplicationEvent/" style="font-size: 13px;">ApplicationEvent</a> <a href="/tags/ArrayList/" style="font-size: 13px;">ArrayList</a> <a href="/tags/BOP/" style="font-size: 13px;">BOP</a> <a href="/tags/Bean/" style="font-size: 13px;">Bean</a> <a href="/tags/BeanDefinitionReader/" style="font-size: 13px;">BeanDefinitionReader</a> <a href="/tags/BeanFactoryPostProcessor/" style="font-size: 13px;">BeanFactoryPostProcessor</a> <a href="/tags/BeanPostProcessor/" style="font-size: 13px;">BeanPostProcessor</a> <a href="/tags/Callable/" style="font-size: 13px;">Callable</a> <a href="/tags/ComponentScan/" style="font-size: 13px;">ComponentScan</a> <a href="/tags/Conditional/" style="font-size: 13px;">Conditional</a> <a href="/tags/DES/" style="font-size: 13px;">DES</a> <a href="/tags/DI-DL/" style="font-size: 13px;">DI/DL</a> <a href="/tags/FactoryBean/" style="font-size: 13px;">FactoryBean</a> <a href="/tags/Future/" style="font-size: 13px;">Future</a> <a href="/tags/FutureTask/" style="font-size: 13.25px;">FutureTask</a> <a href="/tags/Hash/" style="font-size: 13.25px;">Hash</a> <a href="/tags/HttpURLConnection/" style="font-size: 13px;">HttpURLConnection</a> <a href="/tags/IOC/" style="font-size: 13.25px;">IOC</a> <a href="/tags/InputStream/" style="font-size: 13px;">InputStream</a> <a href="/tags/Java/" style="font-size: 13.5px;">Java</a> <a href="/tags/LRU/" style="font-size: 13px;">LRU</a> <a href="/tags/Lazy-bean注解/" style="font-size: 13px;">Lazy-bean注解</a> <a href="/tags/LinkedList/" style="font-size: 13px;">LinkedList</a> <a href="/tags/LockSupport/" style="font-size: 13px;">LockSupport</a> <a href="/tags/MD5withRSA/" style="font-size: 13px;">MD5withRSA</a> <a href="/tags/MD5加密/" style="font-size: 13px;">MD5加密</a> <a href="/tags/O-1/" style="font-size: 13px;">O(1)</a> <a href="/tags/O-log-n/" style="font-size: 13px;">O(log n)</a> <a href="/tags/O-n/" style="font-size: 13px;">O(n)</a> <a href="/tags/OOP/" style="font-size: 13px;">OOP</a> <a href="/tags/PropertyPlaceholderConfigurer/" style="font-size: 13px;">PropertyPlaceholderConfigurer</a> <a href="/tags/PropertySource，Environment，Profile/" style="font-size: 13px;">PropertySource，Environment，Profile</a> <a href="/tags/ReentrantLock/" style="font-size: 13px;">ReentrantLock</a> <a href="/tags/ReentrantReadWriteLock/" style="font-size: 13.25px;">ReentrantReadWriteLock</a> <a href="/tags/Resource/" style="font-size: 13px;">Resource</a> <a href="/tags/ResourceBundle/" style="font-size: 13px;">ResourceBundle</a> <a href="/tags/ResourceLoader/" style="font-size: 13px;">ResourceLoader</a> <a href="/tags/Resource接口/" style="font-size: 13px;">Resource接口</a> <a href="/tags/Semaphore/" style="font-size: 13px;">Semaphore</a> <a href="/tags/Sentinel/" style="font-size: 13px;">Sentinel</a> <a href="/tags/Sharding-jdbc/" style="font-size: 13px;">Sharding-jdbc</a> <a href="/tags/ShardingSphere/" style="font-size: 13px;">ShardingSphere</a> <a href="/tags/SkipList跳表/" style="font-size: 13px;">SkipList跳表</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/Spring-事件机制/" style="font-size: 13px;">Spring 事件机制</a> <a href="/tags/System-arrayCopy/" style="font-size: 13px;">System.arrayCopy</a> <a href="/tags/ThreadLocal/" style="font-size: 13px;">ThreadLocal</a> <a href="/tags/Zookeeper/" style="font-size: 13px;">Zookeeper</a> <a href="/tags/annotation/" style="font-size: 13px;">annotation</a> <a href="/tags/aop/" style="font-size: 13px;">aop</a> <a href="/tags/available/" style="font-size: 13px;">available</a> <a href="/tags/cpu/" style="font-size: 13px;">cpu</a> <a href="/tags/feign/" style="font-size: 13.25px;">feign</a> <a href="/tags/getEnv/" style="font-size: 13px;">getEnv</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/ignoreDependencyInterface/" style="font-size: 13px;">ignoreDependencyInterface</a> <a href="/tags/interrupt/" style="font-size: 13px;">interrupt</a> <a href="/tags/interrupted/" style="font-size: 13px;">interrupted</a> <a href="/tags/isInterrupted/" style="font-size: 13px;">isInterrupted</a> <a href="/tags/java8/" style="font-size: 13px;">java8</a> <a href="/tags/javabean/" style="font-size: 13px;">javabean</a> <a href="/tags/join/" style="font-size: 13px;">join</a> <a href="/tags/jvm/" style="font-size: 13px;">jvm</a> <a href="/tags/kafka/" style="font-size: 13px;">kafka</a> <a href="/tags/pojo/" style="font-size: 13px;">pojo</a> <a href="/tags/redis/" style="font-size: 13.75px;">redis</a> <a href="/tags/ribbon/" style="font-size: 13.25px;">ribbon</a> <a href="/tags/servlet3-0/" style="font-size: 13.25px;">servlet3.0</a> <a href="/tags/sha1加密/" style="font-size: 13px;">sha1加密</a> <a href="/tags/spirng-Profile/" style="font-size: 13px;">spirng Profile</a> <a href="/tags/spring/" style="font-size: 13.25px;">spring</a> <a href="/tags/spring-Autowired/" style="font-size: 13px;">spring Autowired</a> <a href="/tags/spring-Aware/" style="font-size: 13px;">spring Aware</a> <a href="/tags/spring-Configuration注解/" style="font-size: 13px;">spring Configuration注解</a> <a href="/tags/spring-Import注解/" style="font-size: 13px;">spring Import注解</a> <a href="/tags/spring-Primary/" style="font-size: 13px;">spring Primary</a> <a href="/tags/spring-PropertySource原理/" style="font-size: 13px;">spring PropertySource原理</a> <a href="/tags/spring-PropertySource注解/" style="font-size: 13px;">spring PropertySource注解</a> <a href="/tags/spring-Qualifier/" style="font-size: 13px;">spring Qualifier</a> <a href="/tags/spring-Scope注解/" style="font-size: 13px;">spring Scope注解</a> <a href="/tags/spring-mvc/" style="font-size: 13px;">spring mvc</a> <a href="/tags/spring-value注解/" style="font-size: 13px;">spring value注解</a> <a href="/tags/spring-导图/" style="font-size: 13px;">spring 导图</a> <a href="/tags/spring-生命周期/" style="font-size: 13px;">spring-生命周期</a> <a href="/tags/threadLocal/" style="font-size: 13px;">threadLocal</a> <a href="/tags/volatile/" style="font-size: 13px;">volatile</a> <a href="/tags/位运算/" style="font-size: 13px;">位运算</a> <a href="/tags/公钥和私钥/" style="font-size: 13px;">公钥和私钥</a> <a href="/tags/分布式锁/" style="font-size: 13px;">分布式锁</a> <a href="/tags/占位符解析器/" style="font-size: 13px;">占位符解析器</a> <a href="/tags/国际化/" style="font-size: 13.25px;">国际化</a> <a href="/tags/异步controller/" style="font-size: 13px;">异步controller</a> <a href="/tags/强引用、软引用、弱引用、虚引用/" style="font-size: 13px;">强引用、软引用、弱引用、虚引用</a> <a href="/tags/熔断/" style="font-size: 13px;">熔断</a> <a href="/tags/线程池/" style="font-size: 13px;">线程池</a> <a href="/tags/线程通信/" style="font-size: 13px;">线程通信</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/设计模式六大原则/" style="font-size: 13px;">设计模式六大原则</a> <a href="/tags/进制转换/" style="font-size: 13px;">进制转换</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">33</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/NoSql/">NoSql</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/08/Redis之字符串/" class="title">Redis之字符串</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-08T05:21:20.000Z" itemprop="datePublished">2019-03-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/NoSql/">NoSql</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/08/Redis之链表/" class="title">Redis之链表</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-08T05:17:42.000Z" itemprop="datePublished">2019-03-08</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/NoSql/">NoSql</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/07/Redis之对象/" class="title">Redis之对象</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-07T09:32:18.000Z" itemprop="datePublished">2019-03-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/NoSql/">NoSql</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/07/压缩列表zipList/" class="title">压缩列表zipList</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-07T02:11:07.000Z" itemprop="datePublished">2019-03-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/算法/">算法</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/06/算法之SkipList跳表/" class="title">算法之SkipList跳表</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-06T07:10:11.000Z" itemprop="datePublished">2019-03-06</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="main-center-Sharding-JDBC介绍" class="article article-type-main-center" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Sharding-JDBC介绍
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/01/21/Sharding-JDBC介绍/" class="article-date">
+	  <time datetime="2019-01-21T09:37:31.000Z" itemprop="datePublished">2019-01-21</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/分布式/">分布式</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/Sharding-jdbc/">Sharding-jdbc</a>, <a class="article-tag-link" href="/tags/ShardingSphere/">ShardingSphere</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/01/21/Sharding-JDBC介绍/" class="leancloud_visitors" data-flag-title="Sharding-JDBC介绍">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/01/21/Sharding-JDBC介绍/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.5k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 10(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>背景关系型数据库在大于一定数据量的情况下性能会急剧下降。在面对互联网海量数据的情况时,所有数据都存于一张表,显然很容易会达到数据表可承受的数据量阈值。单纯分表虽然可以解决数据量过大导致检索变慢的问题,但无法解决高并发情况下访问同一个库,导致数据库响应变慢的问题。所以通常水平拆分都至少要采用分库的方式,以一并解决大数据量&amp;;高并发的问题。但分表也有不可替代的…<br><a id="more"></a></p>
+<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>关系型数据库在大于一定数据量的情况下性能会急剧下降。在面对互联网海量数据的情况时,所有数据都存于一张表,显然很容易会达到数据表可承受的数据量阈值。<br>单纯分表虽然可以解决数据量过大导致检索变慢的问题,但无法解决高并发情况下访问同一个库,导致数据库响应变慢的问题。所以通常水平拆分都至少要采用分库的方式,以一并解决大数据量&amp;;高并发的问题。<br>但分表也有不可替代的场景。最常见的分表需求是事务问题。同一个库则不需要考虑分布式事务问题,善于使用同库不同表可有效的避免分布式事务带来的麻烦。目前,强一致性的分布式事务由于性能问题,导致使用起来性能并不一定会比不分库分表快,因此采用最终一致性的分布式事务居多。 </p>
+<h1 id="2-分库分表"><a href="#2-分库分表" class="headerlink" title="2. 分库分表"></a>2. 分库分表</h1><p>分库分表用于应对当前互联网常见的两个场景:大数据量 &amp;; 高并发。通常分为:垂直拆分 &amp;; 水平拆分。 垂直拆分是根据业务将一个库(表)拆分为多个库(表)。如:将经常和不经常访问的字段拆分至不同的库(表)中,与业务关系密切。 水平拆分是根据分片算法将一个库(表)拆分为多个库(表)。</p>
+<h1 id="3-Sharding-JDBC"><a href="#3-Sharding-JDBC" class="headerlink" title="3. Sharding-JDBC"></a>3. Sharding-JDBC</h1><p>Sharding-JDBC是当当应用框架ddframe中,从关系型数据库模块dd-rdb中分离出来的数据库水平分片框架,是继dubbox、elastic-job之后ddframe开源的第三个项目。</p>
+<p>Sharding-JDBC直接分装jdbc协议,可理解为增强版的JDBC驱动,旧代码迁移成本几乎为零,定位为轻量级java框架,使用客户端直连数据库,以jar包形式提供服务,无proxy层。</p>
+<p>主要包括以下特点:</p>
+<ul>
+<li>可适用于任何基于java的ORM框架,如:JPA、Hibernate、Mybatis、Spring JDBC Template,或直接使用JDBC </li>
+<li>可基于任何第三方的数据库连接池,如:DBCP、C3P0、Durid等 </li>
+<li>理论上可支持任意实现JDBC规范的数据库。目前仅支持mysql </li>
+<li>分片策略灵活,可支持等号、between、in等多维度分片,也可支持多分片键。 </li>
+<li>SQL解析功能完善,支持聚合、分组、排序、limit、or等查询,并支持Binding Table以及笛卡尔积表查询。 </li>
+<li>性能高,单库查询QPS为原生JDBC的99.8%,双库查询QPS比单库增加94%。 </li>
+</ul>
+<p><strong>架构</strong><br><img src="0d31edabc368a0bd0013de4cbc444232.jpg" alt="架构"></p>
+<p><strong>核心概念</strong> </p>
+<ul>
+<li>LogicTable:数据分片的逻辑表,对于水平拆分的数据库(表)来说,是同一类表的总称。如:订单数据根据主键尾数拆分为10张表,分表是t order 0到t order 9,他们的逻辑表名为t_order。 </li>
+<li>ActualTable:分片数据中真实存在的物理表。 </li>
+<li>DataNode:数据分片的最小单元,由数据源名称和数据表组成。如:ds 1.t order_0。 </li>
+<li>DynamicTable:逻辑表和物理表不一定需要在配置规则中静态配置。如,按照日期分片的场景,物理表的名称随着时间的推移会产生变化。 </li>
+<li>BindingTable:指在任何场景下分片规则均一致的主表和子表。例:订单表和订单项表,均按照订单ID分片,则此两张表互为BindingTable关系。BindingTable关系的多表关联查询不会出现笛卡尔积关联,查询效率将大大提升。 </li>
+<li>ShardingColumn:分片字段用于将数据库(表)水平拆分的字段。 </li>
+<li>ShardingAlgorithm:分片算法。 </li>
+<li>SQL Hint:对于分片字段非SQL决定,而由其他外置条件决定的场景,可使用SQL Hint灵活的注入分片字段。 </li>
+</ul>
+<p><strong>数据源分布规则配置</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Map&lt;String, DataSource&gt; <span class="title">createDataSourceMap</span><span class="params">(List&lt;Database&gt; dbs)</span> </span>&#123; </span><br><span class="line">    <span class="keyword">if</span> (CollectionUtils.isEmpty(dbs)) &#123; </span><br><span class="line">        logger.error(<span class="string">"db configuration is null!"</span>); </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    Map&lt;String, DataSource&gt; dataSourceMap = <span class="keyword">new</span> HashMap&lt;&gt;(); </span><br><span class="line">    <span class="keyword">for</span> (Database db : dbs) &#123; </span><br><span class="line">        dataSourceMap.put(db.getDbname(), createDataSource(db)); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> dataSourceMap; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">DataSourceRule dataSourceRule = <span class="keyword">new</span> DataSourceRule(createDataSourceMap(dataSourceProperties.getDbs()));</span><br></pre></td></tr></table></figure>
+<p><strong>逻辑表&amp;;物理表映射</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TableRule orderTableRule =TableRule.builder(<span class="string">"order"</span>).actualTables(Arrays.asList(<span class="string">"t_order_0"</span>, <span class="string">"t_order_1"</span>)).dataSourceRule(dataSourceRule).build();</span><br></pre></td></tr></table></figure>
+<p><strong>分片策略配置 </strong><br>Sharding-jdbc认为对于分片策略有两种维度:</p>
+<ul>
+<li>数据源分片策略(DatabaseShardingStrategy) 数据被分配的目标数据源。 </li>
+<li>表分片策略(TableShardingStrategy) 数据被分配的目标表,该目标表在该数据对应的目标数据源内。 </li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">DatabaseShardingStrategy databaseShardingStrategy = <span class="keyword">new</span> DatabaseShardingStrategy(<span class="string">"user_id"</span>, <span class="keyword">new</span> ModuloDatabaseShardingAlgorithm()); </span><br><span class="line">TableShardingStrategy tableShardingStrategy = <span class="keyword">new</span> TableShardingStrategy(<span class="string">"order_id"</span>, <span class="keyword">new</span> ModuloTableShardingAlgorithm()); </span><br><span class="line">ShardingRule shardingRule = ShardingRule.builder() </span><br><span class="line">    .dataSourceRule(dataSourceRule) </span><br><span class="line">    .tableRules(Arrays.asList(orderTableRule, orderItemTableRule)) </span><br><span class="line">    .databaseShardingStrategy(databaseShardingStrategy) </span><br><span class="line">    .tableShardingStrategy(tableShardingStrategy) </span><br><span class="line">    .build(); </span><br><span class="line"></span><br><span class="line"><span class="comment">// ShardingDataSource </span></span><br><span class="line"></span><br><span class="line">DataSource shardingDataSource = ShardingDataSourceFactory.createDataSource(shardingRule);</span><br></pre></td></tr></table></figure>
+<p><strong>JDBC规范重写</strong><br>针对DataSource、Connection、Statement、PreparedStatement和ResultSet五个核心接口封装。</p>
+<ul>
+<li>DataSource:ShardingDataSource </li>
+<li>Connetion:ShardingConnection ShardingConnection是一种逻辑上的分布式数据库链接,成员变量ShardingContext,即数据源运行的上下文信息。 </li>
+<li>ShardingContext包括:ShardingRule:分片规则;ExecutorEngine:执行引擎,通过多线程的方式并行执行SQL。 </li>
+<li>Statement:ShardingStatement </li>
+<li>PreparedStatement:ShardingPreparedStatement </li>
+<li>ResultSet:ShardingResultSet </li>
+</ul>
+<p><strong>SQL解析</strong> </p>
+<p><img src="5694af1f649eb968c9b09b28f35786b2.jpg" alt="SQL解析"></p>
+<p>常见的SQL解析主要有:fdb/jsqlparser、Druid;sharding-jdbc 1.5.0.M1将SQL解析引擎从Druid换成了自研的解析引擎。 Sharding-jdbc支持join、aggregation、order by、group by、limit、or;目前不支持union、部分子查询、函数内分片等不太应在分片场景中出现的SQL解析。</p>
+<p>SQL解析引擎在sharding-jdbc-core模块下com.dangdang.ddframe.rdb.sharding.parsing包下,包含两个组件:</p>
+<ul>
+<li>Lexer:词法解析器</li>
+<li>Parser:SQL解析器</li>
+</ul>
+<p><img src="160de2ecdf238bfc2c16747a134503b0.jpg" alt=""></p>
+<p><img src="9f82893a6a07f67ab9e1ffd24be3944a.jpg" alt=""></p>
+<p><strong>Lexer词法解析器</strong><br>关键类:LexerEngine、Lexer、Token、Tokenizer Lexer原理:顺序解析SQL,将字符串拆成N个Token。</p>
+<p>通过Lexer#nextToken方法不断解析出Token Token结构(以select为例):<br><img src="0c74f2fcb2f32741003cb5d3220e2cb4.jpg" alt=""></p>
+<p><img src="573dd74926e10ba8ea9bd37a733ed2cf.jpg" alt=""></p>
+<p><img src="a157549e2138ad5f4916c003dfdf6af7.jpg" alt=""></p>
+<p><strong>SQL解析(以Select为例)</strong><br>关键类:SQLParsingEngine、AbstractSelectParser(MySQLSelectParser)、SelectStatement、ExpressionClauseParser(parse(SQLStatement)) </p>
+<p><img src="bd908653bc7fbfafa0cb3f6e0008549d.jpg" alt=""></p>
+<p><code>SQLParseEngine</code>:SQL解析引擎,parse()方法为SQL解析的入口。 - AbstractSelectParser(MySQLSelectParser):SQL解析器,和词法解析器Lexer类似,不同数据库有不同的实现。 - ExpressionClauseParser:解析SQLStatement。</p>
+<p><strong>SQL路由&amp;;改写</strong></p>
+<p><img src="6a09bb8f8c0f2e7b738422c682bb5317.jpg" alt=""></p>
+<p>入口:ShardingPreparedStatement.route - 关键类:ShardingPreparedStatement、PreparedStatementRoutingEngine、ParsingSQLRouter、SimpleRoutingEngine 、ComplexRoutingEngine 、SQLRewriteEngine、 </p>
+<p><img src="f98ce7ac4a8a04b63fb6be9d0a590bd3.jpg" alt=""></p>
+<p><img src="181b542661a6a5baf11c5427e449e5ac.jpg" alt=""></p>
+<p><strong>SQL执行 &amp;; 归并</strong><br><img src="2390e88c9f9ce28cb01f7cbf0f37da13.jpg" alt=""></p>
+<p>入口:ShardingPreparedStatement.executeQuery 关键类:ShardingPreparedStatement、PreparedStatementExecutor、ExecutorEngine</p>
+<p><img src="95685342d67826bbf1f4ac0f6888a7eb.jpg" alt=""></p>
+<p><img src="4eaf342b602a4546a49b9076a77bfada.jpg" alt=""></p>
+<p>入口:ShardingPreparedStatement.executeQuery 关键类:ShardingPreparedStatement、ShardingResultSet、MergeEngine<br><img src="30185fb378b04895fea07ce10c525db1.jpg" alt=""></p>
+<p>读写分离<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rdb:master-slave-data-source</span> <span class="attr">id</span>=<span class="string">"db_cluster0"</span> <span class="attr">master-data-source-ref</span>=<span class="string">"db0"</span> <span class="attr">slave-data-sources-ref</span>=<span class="string">"db0_slave1, db0_slave0"</span> /&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rdb:master-slave-data-source</span> <span class="attr">id</span>=<span class="string">"db_cluster1"</span> <span class="attr">master-data-source-ref</span>=<span class="string">"db1"</span> <span class="attr">slave-data-sources-ref</span>=<span class="string">"db1_slave0, db1_slave1"</span> /&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rdb:strategy</span> <span class="attr">id</span>=<span class="string">"databaseStrategy"</span> <span class="attr">sharding-columns</span>=<span class="string">"user_id"</span> <span class="attr">algorithm-class</span>=<span class="string">"com.bing.shardingjdbc.spring.algorithm.ModuloDatabaseShardingAlgorithm"</span> /&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rdb:strategy</span> <span class="attr">id</span>=<span class="string">"orderTableStrategy"</span> <span class="attr">sharding-columns</span>=<span class="string">"order_id"</span> <span class="attr">algorithm-expression</span>=<span class="string">"t_order_$&#123;order_id.longValue() % 2&#125;"</span> /&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rdb:strategy</span> <span class="attr">id</span>=<span class="string">"orderItemTableStrategy"</span> <span class="attr">sharding-columns</span>=<span class="string">"order_id"</span> <span class="attr">algorithm-class</span>=<span class="string">"com.bing.shardingjdbc.spring.algorithm.ModuloTableShardingAlgorithm"</span> /&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rdb:data-source</span> <span class="attr">id</span>=<span class="string">"shardingDataSource"</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">rdb:sharding-rule</span> <span class="attr">data-sources</span>=<span class="string">"db_cluster0, db_cluster1"</span> <span class="attr">key-generator-class</span>=<span class="string">"com.dangdang.ddframe.rdb.sharding.keygen.DefaultKeyGenerator"</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">rdb:table-rules</span>&gt;</span> </span><br><span class="line">            <span class="tag">&lt;<span class="name">rdb:table-rule</span> <span class="attr">logic-table</span>=<span class="string">"order"</span> <span class="attr">actual-tables</span>=<span class="string">"t_order_$&#123;0..1&#125;"</span> <span class="attr">database-strategy</span>=<span class="string">"databaseStrategy"</span> <span class="attr">table-strategy</span>=<span class="string">"orderTableStrategy"</span>&gt;</span> </span><br><span class="line">                <span class="tag">&lt;<span class="name">rdb:generate-key-column</span> <span class="attr">column-name</span>=<span class="string">"order_id"</span> /&gt;</span> </span><br><span class="line">            <span class="tag">&lt;/<span class="name">rdb:table-rule</span>&gt;</span> </span><br><span class="line">            <span class="tag">&lt;<span class="name">rdb:table-rule</span> <span class="attr">logic-table</span>=<span class="string">"order_item"</span> <span class="attr">actual-tables</span>=<span class="string">"t_order_item_$&#123;0..1&#125;"</span> <span class="attr">database-strategy</span>=<span class="string">"databaseStrategy"</span> <span class="attr">table-strategy</span>=<span class="string">"orderItemTableStrategy"</span>&gt;</span> </span><br><span class="line">                <span class="tag">&lt;<span class="name">rdb:generate-key-column</span> <span class="attr">column-name</span>=<span class="string">"item_id"</span> /&gt;</span> </span><br><span class="line">            <span class="tag">&lt;/<span class="name">rdb:table-rule</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;/<span class="name">rdb:table-rules</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">rdb:sharding-rule</span>&gt;</span> </span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">rdb:props</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">prop</span> <span class="attr">key</span>=<span class="string">"metrics.enable"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">prop</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">prop</span> <span class="attr">key</span>=<span class="string">"sql.show"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">prop</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">rdb:props</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rdb:data-source</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>关键类:MasterSlaveDataSourceFactory、MasterSlaveDataSource、 MasterSlaveLoadBalanceStrategy(负载均衡策略,包括Random &amp;; RoundRobin)、<br>默认主从负载均衡策略:轮询RoundRobinMasterSlaveLoadBalanceStrategy </p>
+<p><img src="9392af4d59283516ab026a950d7acd35.jpg" alt=""></p>
+<p><strong>分布式主键</strong></p>
+<ol>
+<li>Twitter snowflake </li>
+</ol>
+<p><img src="5deff90bdc30ce72a6da990e92c93cfc.jpg" alt=""></p>
+<p>1位符号位,始终为0; </p>
+<p>41位时间戳,一般实现上不会存储当前的时间戳,而是时间戳的差值(当前时间-固定的开始时间),这样可以使产生的id从更小值开始;41位时间戳可以使用69年,1L&lt;&lt;41/(1000L 60 60 24 365) = 69年 </p>
+<p>10位节点位,前五位数据中心标识,后五位机器标识,可以部署1024个节点 </p>
+<p>12位序列号,支持同一个节点同一毫秒可以生成4069个ID </p>
+<p>Sharding-JDBC :1bit符号位(为0),41bit时间位,10bit工作进程位,12bit序列位。</p>
+<p>spring 配置:</p>
+<p><img src="58e03fbd59f688b94bcc1acd4006492d.jpg" alt=""></p>
+<ol start="2">
+<li>Flicker<br>利用MySQL的auto increment、replace into、MyISAM,生成一个64位的ID。 - 先创建一个单独的数据库:如global id - 创建表:</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> global_id_64 ( </span><br><span class="line">    <span class="keyword">id</span> <span class="built_in">bigint</span>(<span class="number">20</span>) <span class="keyword">unsigned</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> auto_increment, </span><br><span class="line">    stub <span class="built_in">char</span>(<span class="number">1</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">default</span> <span class="string">''</span>, </span><br><span class="line">    PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>), </span><br><span class="line">    <span class="keyword">UNIQUE</span> <span class="keyword">KEY</span> stub (stub) </span><br><span class="line">) <span class="keyword">ENGINE</span>=MyISAM</span><br></pre></td></tr></table></figure>
+<p>应用端在一个事务里提交:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">REPLACE</span> <span class="keyword">INTO</span> Tickets64 (stub) <span class="keyword">VALUES</span> (<span class="string">'a'</span>); </span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">LAST_INSERT_ID</span>();</span><br></pre></td></tr></table></figure>
+<p>解决单点问题:启用两台数据库服务器,通过区分auto_increment的起始值和步长来生成奇偶数的ID: </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Server1: </span><br><span class="line">auto-increment-increment = 2 //自增长字段每次递增的量 </span><br><span class="line">auto-increment-offset = 1//自增长字段开始值 </span><br><span class="line"></span><br><span class="line">Server2: </span><br><span class="line">auto-increment-increment = 2 </span><br><span class="line">auto-increment-offset = 2</span><br></pre></td></tr></table></figure>
+<p>应用端轮询取id<br>柔性事务——最大努力送达型<br>Sharding-JDBC最大努力送达型事务认为对该数据库的操作最终一定可以成功,因此通过最大努力反复尝试送达操作。</p>
+<p><img src="c99f1138113dc6c27ffd09dae267aa82.jpg" alt=""></p>
+<p><strong>事务日志存储器</strong></p>
+<ul>
+<li><p>基于内存: </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SoftTransactionConfiguration.setStorageType(TransactionLogDataSourceType.MEMORY);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>基于RDB: </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SoftTransactionConfiguration.setTransactionLogDataSource(txLogDataSource);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>默认的storageType 为 RDB。</p>
+<p>异步作业<br>内嵌异步作业:<br>// 使用内嵌异步作业,仅用于开发环境<br>// 内嵌了一个注册中心,默认zookeeperPort 4181<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NestedBestEffortsDeliveryJobConfiguration nestedJobConfig = <span class="keyword">new</span> NestedBestEffortsDeliveryJobConfiguration(); </span><br><span class="line">txConfig.setBestEffortsDeliveryJobConfiguration(Optional.of(nestedJobConfig));</span><br></pre></td></tr></table></figure></p>
+<p>独立部署作业<br>事务日志库<br>用于异步作业的zk<br>下载sharding-jdbc-transaction-async-job,通过start.sh脚本启动异步作业: </p>
+<p>官网：<a href="https://github.com/apache/incubator-shardingsphere" target="_blank" rel="noopener">https://github.com/apache/incubator-shardingsphere</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/" title="Sharding-JDBC介绍" target="_blank" rel="external">http://blog.shagle.cn/2019/01/21/Sharding-JDBC介绍/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="/" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="/" target="_blank"><span class="text-dark">波哥</span><small class="ml-1x">Java Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/01/25/servlet3/" title="Servlet 3.0 新特性概述"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/01/18/阿里GTS开源版本fescar分布式事务发布了/" title="阿里GTS开源版本fescar分布式事务发布了"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av.js"></script>
+  <script src="//unpkg.com/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: true,
+    notify: false,
+    appId: 'Muwda2bDL8O5i5pKEdIpN23P-gzGzoHsz',
+    appKey: 'P9KEnaQt3ucxmcqtGKHStMHu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
