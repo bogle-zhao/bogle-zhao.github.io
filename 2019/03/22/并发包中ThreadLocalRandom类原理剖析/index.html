@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>并发包中ThreadLocalRandom类原理剖析 | 赵波的技术博客</title>
+  <meta name="description" content="1. 并发包中ThreadLocalRandom类原理剖析ThreadLocalRandom类是JDK7在JUC包下新增的随机数生成器，它解决了Random类在多线程下多个线程竞争内部唯一的原子性种子变量而导致大量线程自旋重试的不足。本节首先讲解下Random类的实现原理已经它在多线程下使用的局限性，然后引入ThreadLocalRandom类，通过讲解ThreadLocalRandom的实现原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发包中ThreadLocalRandom类原理剖析">
+<meta property="og:url" content="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/index.html">
+<meta property="og:site_name" content="个人博客">
+<meta property="og:description" content="1. 并发包中ThreadLocalRandom类原理剖析ThreadLocalRandom类是JDK7在JUC包下新增的随机数生成器，它解决了Random类在多线程下多个线程竞争内部唯一的原子性种子变量而导致大量线程自旋重试的不足。本节首先讲解下Random类的实现原理已经它在多线程下使用的局限性，然后引入ThreadLocalRandom类，通过讲解ThreadLocalRandom的实现原理">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/5879294-f28b763a7bc5cebe.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/5879294-4c58aad729e49293.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/5879294-de63d1e5f21bd72c.png">
+<meta property="og:updated_time" content="2019-03-22T07:21:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="并发包中ThreadLocalRandom类原理剖析">
+<meta name="twitter:description" content="1. 并发包中ThreadLocalRandom类原理剖析ThreadLocalRandom类是JDK7在JUC包下新增的随机数生成器，它解决了Random类在多线程下多个线程竞争内部唯一的原子性种子变量而导致大量线程自旋重试的不足。本节首先讲解下Random类的实现原理已经它在多线程下使用的局限性，然后引入ThreadLocalRandom类，通过讲解ThreadLocalRandom的实现原理">
+<meta name="twitter:image" content="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/5879294-f28b763a7bc5cebe.png">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="个人博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center theme-purple" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="/" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">波哥</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> ChengDu, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/HttpClient/">HttpClient</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/I-O/">I/O</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java8/">Java8</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java中String、StringBuffer、StringBuilder的区别/">Java中String、StringBuffer、StringBuilder的区别</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java并发/">Java并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/">Java技术</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/多线程/">多线程</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQ/">MQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NoSql/">NoSql</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-MVC/">Spring MVC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/">Spring源码深度解析</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/Spring/">Spring</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ribbon/">ribbon</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/rpc/">rpc</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet/">servlet</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/">servlet3.0</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/spring-mvc/">spring mvc</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">32</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/Zookeeper/">Zookeeper</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程术语/">编程术语</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AES/">AES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AOP/">AOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AQS/">AQS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ApplicationEvent/">ApplicationEvent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ArrayList/">ArrayList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BOP/">BOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bean/">Bean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanDefinitionReader/">BeanDefinitionReader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanFactoryPostProcessor/">BeanFactoryPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanPostProcessor/">BeanPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Callable/">Callable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ComponentScan/">ComponentScan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Conditional/">Conditional</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DES/">DES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DI-DL/">DI/DL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FactoryBean/">FactoryBean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Future/">Future</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FutureTask/">FutureTask</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hash/">Hash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HttpURLConnection/">HttpURLConnection</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O多路复用/">I/O多路复用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/">IOC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/InputStream/">InputStream</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LRU/">LRU</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Lazy-bean注解/">Lazy-bean注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LinkedList/">LinkedList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LockSupport/">LockSupport</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5withRSA/">MD5withRSA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5加密/">MD5加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-1/">O(1)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-log-n/">O(log n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-n/">O(n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertyPlaceholderConfigurer/">PropertyPlaceholderConfigurer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertySource，Environment，Profile/">PropertySource，Environment，Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Protocol-buffers/">Protocol buffers</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantLock/">ReentrantLock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantReadWriteLock/">ReentrantReadWriteLock</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource/">Resource</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceBundle/">ResourceBundle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceLoader/">ResourceLoader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource接口/">Resource接口</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Semaphore/">Semaphore</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/">Sentinel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sharding-jdbc/">Sharding-jdbc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ShardingSphere/">ShardingSphere</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SkipList跳表/">SkipList跳表</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-事件机制/">Spring 事件机制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/System-arrayCopy/">System.arrayCopy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThreadLocal/">ThreadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Zookeeper/">Zookeeper</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/">annotation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/aop/">aop</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/available/">available</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cpu/">cpu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/feign/">feign</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/getEnv/">getEnv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/grpc/">grpc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ignoreDependencyInterface/">ignoreDependencyInterface</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupt/">interrupt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupted/">interrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/isInterrupted/">isInterrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java8/">java8</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javabean/">javabean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/join/">join</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pojo/">pojo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ribbon/">ribbon</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/servlet3-0/">servlet3.0</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sha1加密/">sha1加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spirng-Profile/">spirng Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Autowired/">spring Autowired</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Aware/">spring Aware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Configuration注解/">spring Configuration注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Import注解/">spring Import注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Primary/">spring Primary</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource原理/">spring PropertySource原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource注解/">spring PropertySource注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Qualifier/">spring Qualifier</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Scope注解/">spring Scope注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-mvc/">spring mvc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-value注解/">spring value注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-导图/">spring 导图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-生命周期/">spring-生命周期</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/threadLocal/">threadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/volatile/">volatile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/位运算/">位运算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/公钥和私钥/">公钥和私钥</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式锁/">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/占位符解析器/">占位符解析器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/国际化/">国际化</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步controller/">异步controller</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/强引用、软引用、弱引用、虚引用/">强引用、软引用、弱引用、虚引用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/熔断/">熔断</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程池/">线程池</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程通信/">线程通信</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式六大原则/">设计模式六大原则</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进制转换/">进制转换</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AES/" style="font-size: 13px;">AES</a> <a href="/tags/AOP/" style="font-size: 13px;">AOP</a> <a href="/tags/AQS/" style="font-size: 13px;">AQS</a> <a href="/tags/ApplicationEvent/" style="font-size: 13px;">ApplicationEvent</a> <a href="/tags/ArrayList/" style="font-size: 13px;">ArrayList</a> <a href="/tags/BOP/" style="font-size: 13px;">BOP</a> <a href="/tags/Bean/" style="font-size: 13px;">Bean</a> <a href="/tags/BeanDefinitionReader/" style="font-size: 13px;">BeanDefinitionReader</a> <a href="/tags/BeanFactoryPostProcessor/" style="font-size: 13px;">BeanFactoryPostProcessor</a> <a href="/tags/BeanPostProcessor/" style="font-size: 13px;">BeanPostProcessor</a> <a href="/tags/Callable/" style="font-size: 13px;">Callable</a> <a href="/tags/ComponentScan/" style="font-size: 13px;">ComponentScan</a> <a href="/tags/Conditional/" style="font-size: 13px;">Conditional</a> <a href="/tags/DES/" style="font-size: 13px;">DES</a> <a href="/tags/DI-DL/" style="font-size: 13px;">DI/DL</a> <a href="/tags/FactoryBean/" style="font-size: 13px;">FactoryBean</a> <a href="/tags/Future/" style="font-size: 13px;">Future</a> <a href="/tags/FutureTask/" style="font-size: 13.25px;">FutureTask</a> <a href="/tags/Hash/" style="font-size: 13.25px;">Hash</a> <a href="/tags/HttpURLConnection/" style="font-size: 13px;">HttpURLConnection</a> <a href="/tags/I-O多路复用/" style="font-size: 13px;">I/O多路复用</a> <a href="/tags/IOC/" style="font-size: 13.25px;">IOC</a> <a href="/tags/InputStream/" style="font-size: 13px;">InputStream</a> <a href="/tags/Java/" style="font-size: 13.5px;">Java</a> <a href="/tags/LRU/" style="font-size: 13px;">LRU</a> <a href="/tags/Lazy-bean注解/" style="font-size: 13px;">Lazy-bean注解</a> <a href="/tags/LinkedList/" style="font-size: 13px;">LinkedList</a> <a href="/tags/LockSupport/" style="font-size: 13px;">LockSupport</a> <a href="/tags/MD5withRSA/" style="font-size: 13px;">MD5withRSA</a> <a href="/tags/MD5加密/" style="font-size: 13px;">MD5加密</a> <a href="/tags/O-1/" style="font-size: 13px;">O(1)</a> <a href="/tags/O-log-n/" style="font-size: 13px;">O(log n)</a> <a href="/tags/O-n/" style="font-size: 13px;">O(n)</a> <a href="/tags/OOP/" style="font-size: 13px;">OOP</a> <a href="/tags/PropertyPlaceholderConfigurer/" style="font-size: 13px;">PropertyPlaceholderConfigurer</a> <a href="/tags/PropertySource，Environment，Profile/" style="font-size: 13px;">PropertySource，Environment，Profile</a> <a href="/tags/Protocol-buffers/" style="font-size: 13px;">Protocol buffers</a> <a href="/tags/ReentrantLock/" style="font-size: 13px;">ReentrantLock</a> <a href="/tags/ReentrantReadWriteLock/" style="font-size: 13.25px;">ReentrantReadWriteLock</a> <a href="/tags/Resource/" style="font-size: 13px;">Resource</a> <a href="/tags/ResourceBundle/" style="font-size: 13px;">ResourceBundle</a> <a href="/tags/ResourceLoader/" style="font-size: 13px;">ResourceLoader</a> <a href="/tags/Resource接口/" style="font-size: 13px;">Resource接口</a> <a href="/tags/Semaphore/" style="font-size: 13px;">Semaphore</a> <a href="/tags/Sentinel/" style="font-size: 13px;">Sentinel</a> <a href="/tags/Sharding-jdbc/" style="font-size: 13px;">Sharding-jdbc</a> <a href="/tags/ShardingSphere/" style="font-size: 13px;">ShardingSphere</a> <a href="/tags/SkipList跳表/" style="font-size: 13px;">SkipList跳表</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/Spring-事件机制/" style="font-size: 13px;">Spring 事件机制</a> <a href="/tags/System-arrayCopy/" style="font-size: 13px;">System.arrayCopy</a> <a href="/tags/ThreadLocal/" style="font-size: 13px;">ThreadLocal</a> <a href="/tags/Zookeeper/" style="font-size: 13px;">Zookeeper</a> <a href="/tags/annotation/" style="font-size: 13px;">annotation</a> <a href="/tags/aop/" style="font-size: 13px;">aop</a> <a href="/tags/available/" style="font-size: 13px;">available</a> <a href="/tags/cpu/" style="font-size: 13px;">cpu</a> <a href="/tags/feign/" style="font-size: 13.25px;">feign</a> <a href="/tags/getEnv/" style="font-size: 13px;">getEnv</a> <a href="/tags/grpc/" style="font-size: 13px;">grpc</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/ignoreDependencyInterface/" style="font-size: 13px;">ignoreDependencyInterface</a> <a href="/tags/interrupt/" style="font-size: 13px;">interrupt</a> <a href="/tags/interrupted/" style="font-size: 13px;">interrupted</a> <a href="/tags/isInterrupted/" style="font-size: 13px;">isInterrupted</a> <a href="/tags/java8/" style="font-size: 13px;">java8</a> <a href="/tags/javabean/" style="font-size: 13px;">javabean</a> <a href="/tags/join/" style="font-size: 13px;">join</a> <a href="/tags/jvm/" style="font-size: 13px;">jvm</a> <a href="/tags/kafka/" style="font-size: 13px;">kafka</a> <a href="/tags/pojo/" style="font-size: 13px;">pojo</a> <a href="/tags/redis/" style="font-size: 13.75px;">redis</a> <a href="/tags/ribbon/" style="font-size: 13.25px;">ribbon</a> <a href="/tags/servlet3-0/" style="font-size: 13.25px;">servlet3.0</a> <a href="/tags/sha1加密/" style="font-size: 13px;">sha1加密</a> <a href="/tags/spirng-Profile/" style="font-size: 13px;">spirng Profile</a> <a href="/tags/spring/" style="font-size: 13.25px;">spring</a> <a href="/tags/spring-Autowired/" style="font-size: 13px;">spring Autowired</a> <a href="/tags/spring-Aware/" style="font-size: 13px;">spring Aware</a> <a href="/tags/spring-Configuration注解/" style="font-size: 13px;">spring Configuration注解</a> <a href="/tags/spring-Import注解/" style="font-size: 13px;">spring Import注解</a> <a href="/tags/spring-Primary/" style="font-size: 13px;">spring Primary</a> <a href="/tags/spring-PropertySource原理/" style="font-size: 13px;">spring PropertySource原理</a> <a href="/tags/spring-PropertySource注解/" style="font-size: 13px;">spring PropertySource注解</a> <a href="/tags/spring-Qualifier/" style="font-size: 13px;">spring Qualifier</a> <a href="/tags/spring-Scope注解/" style="font-size: 13px;">spring Scope注解</a> <a href="/tags/spring-mvc/" style="font-size: 13px;">spring mvc</a> <a href="/tags/spring-value注解/" style="font-size: 13px;">spring value注解</a> <a href="/tags/spring-导图/" style="font-size: 13px;">spring 导图</a> <a href="/tags/spring-生命周期/" style="font-size: 13px;">spring-生命周期</a> <a href="/tags/threadLocal/" style="font-size: 13px;">threadLocal</a> <a href="/tags/volatile/" style="font-size: 13px;">volatile</a> <a href="/tags/位运算/" style="font-size: 13px;">位运算</a> <a href="/tags/公钥和私钥/" style="font-size: 13px;">公钥和私钥</a> <a href="/tags/分布式锁/" style="font-size: 13px;">分布式锁</a> <a href="/tags/占位符解析器/" style="font-size: 13px;">占位符解析器</a> <a href="/tags/国际化/" style="font-size: 13.25px;">国际化</a> <a href="/tags/异步controller/" style="font-size: 13px;">异步controller</a> <a href="/tags/强引用、软引用、弱引用、虚引用/" style="font-size: 13px;">强引用、软引用、弱引用、虚引用</a> <a href="/tags/熔断/" style="font-size: 13px;">熔断</a> <a href="/tags/线程池/" style="font-size: 13px;">线程池</a> <a href="/tags/线程通信/" style="font-size: 13px;">线程通信</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/设计模式六大原则/" style="font-size: 13px;">设计模式六大原则</a> <a href="/tags/进制转换/" style="font-size: 13px;">进制转换</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">33</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/22/并发包中ThreadLocalRandom类原理剖析/" class="title">并发包中ThreadLocalRandom类原理剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-22T07:13:26.000Z" itemprop="datePublished">2019-03-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java中String、StringBuffer、StringBuilder的区别/">Java中String、StringBuffer、StringBuilder的区别</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/22/String和StringBuffer和StringBuilder/" class="title">String和StringBuffer和StringBuilder</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-22T06:13:28.000Z" itemprop="datePublished">2019-03-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RPC/">RPC</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/12/Protocol-buffers翻译/" class="title">Protocol buffers翻译</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-12T13:11:05.000Z" itemprop="datePublished">2019-03-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/rpc/">rpc</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/12/IO复用/" class="title">socket阻塞与非阻塞，同步与异步、I/O模型，select与poll、epoll比较</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-12T06:48:27.000Z" itemprop="datePublished">2019-03-12</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/rpc/">rpc</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/10/grpc翻译/" class="title">grpc翻译</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-10T07:48:49.000Z" itemprop="datePublished">2019-03-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="main-center-并发包中ThreadLocalRandom类原理剖析" class="article article-type-main-center" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      并发包中ThreadLocalRandom类原理剖析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/03/22/并发包中ThreadLocalRandom类原理剖析/" class="article-date">
+	  <time datetime="2019-03-22T07:13:26.000Z" itemprop="datePublished">2019-03-22</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a>
+  </span>
+
+        
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/03/22/并发包中ThreadLocalRandom类原理剖析/" class="leancloud_visitors" data-flag-title="并发包中ThreadLocalRandom类原理剖析">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/22/并发包中ThreadLocalRandom类原理剖析/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 11(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="1-并发包中ThreadLocalRandom类原理剖析"><a href="#1-并发包中ThreadLocalRandom类原理剖析" class="headerlink" title="1. 并发包中ThreadLocalRandom类原理剖析"></a>1. 并发包中ThreadLocalRandom类原理剖析</h1><p>ThreadLocalRandom类是JDK7在JUC包下新增的随机数生成器，它解决了Random类在多线程下多个线程竞争内部唯一的原子性种子变量而导致大量线程自旋重试的不足。本节首先讲解下Random类的实现原理已经它在多线程下使用的局限性，然后引入ThreadLocalRandom类，通过讲解ThreadLocalRandom的实现原理来说明ThreadLocalRandom是如何解决的Random类的不足。</p>
+<h2 id="1-1-Random类及其局限性"><a href="#1-1-Random类及其局限性" class="headerlink" title="1.1 Random类及其局限性"></a>1.1 Random类及其局限性</h2><p>在JDK7之前包括现在java.util.Random应该是使用比较广泛的随机数生成工具类，另外java.lang.Math中的随机数生成也是使用的java.util.Random的实例。下面先看看java.util.Random的使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RandomTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">        <span class="comment">//(1)创建一个默认种子的随机数生成器</span></span><br><span class="line">        Random random = <span class="keyword">new</span> Random();</span><br><span class="line">        <span class="comment">//(2)输出10个在0-5（包含0，不包含5）之间的随机数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; ++i) &#123;</span><br><span class="line">            System.out.println(random.nextInt(<span class="number">5</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>代码（1）创建一个默认随机数生成器，使用默认的种子。</li>
+<li>代码（2）输出输出10个在0-5（包含0，不包含5）之间的随机数。</li>
+</ul>
+<p>这里提下随机数的生成需要一个默认的种子，这个种子其实是一个long类型的数字,这个种子要么在Random的时候通过构造函数指定，那么默认构造函数内部会生成一个默认的值，有了默认的种子后，如何生成随机数那？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nextInt</span><span class="params">(<span class="keyword">int</span> bound)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//(3)参数检查</span></span><br><span class="line">    <span class="keyword">if</span> (bound &lt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(BadBound);</span><br><span class="line">    <span class="comment">//(4)根据老的种子生成新的种子</span></span><br><span class="line">    <span class="keyword">int</span> r = next(<span class="number">31</span>);</span><br><span class="line">    <span class="comment">//(5)根据新的种子计算随机数</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码可知新的随机数的生成需要两个步骤</p>
+<ul>
+<li>首先需要根据老的种子生成新的种子。</li>
+<li>然后根据新的种子来计算新的随机数。</li>
+</ul>
+<p>其中步骤（4）我们可以抽象为seed=f(seed),其中f是一个固定的函数，比如seed= f(seed)=a<em>seed+b;步骤（5）也可以抽象为g(seed,bound)，其中g是一个固定的函数，比如g(seed,bound)=(int)((bound </em> (long)seed) &gt;&gt; 31);在单线程情况下每次调用nextInt都是根据老的种子计算出来新的种子，这是可以保证随机数产生的随机性的。但是在多线程下多个线程可能都拿同一个老的种子去执行步骤（4）计算新的种子，这会导致多个线程产生的新种子是一样的，由于步骤（5）算法是固定的，所以会导致多个线程产生相同的随机值，这并不是我们想要的。所以步骤（4）要保证原子性，也就是说多个线程在根据同一个老种子计算新种子时候，第一个线程的新种子计算出来后，第二个线程要丢弃自己老的种子，要使用第一个线程的新种子来计算自己的新种子，依次类推，只有保证了这个，才能保证多线程下产生的随机数是随机的。Random函数使用一个原子变量达到了这个效果，在创建Random对象时候初始化的种子就保存到了种子原子变量里面，下面看下next()代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">next</span><span class="params">(<span class="keyword">int</span> bits)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> oldseed, nextseed;</span><br><span class="line">    AtomicLong seed = <span class="keyword">this</span>.seed;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="comment">//(6)</span></span><br><span class="line">        oldseed = seed.get();</span><br><span class="line">        <span class="comment">//(7)</span></span><br><span class="line">        nextseed = (oldseed * multiplier + addend) &amp; mask;</span><br><span class="line">        <span class="comment">//(8)</span></span><br><span class="line">    &#125; <span class="keyword">while</span> (!seed.compareAndSet(oldseed, nextseed));</span><br><span class="line">    <span class="comment">//(9)</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">int</span>)(nextseed &gt;&gt;&gt; (<span class="number">48</span> - bits));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>代码（6）获取当前原子变量种子的值</li>
+<li>代码（7）根据当前种子值计算新的种子</li>
+<li>代码（8）使用CAS操作，使用新的种子去更新老的种子，多线程下可能多个线程都同时执行到了代码（6）那么可能多个线程都拿到的当前种子的值是同一个，然后执行步骤（7）计算的新种子也都是一样的，但是步骤（8）的CAS操作会保证只有一个线程可以更新老的种子为新的，失败的线程会通过循环从新获取更新后的种子作为当前种子去计算老的种子，可见这里解决了上面提到的问题，也就保证了随机数的随机性。</li>
+<li>代码（9）则使用固定算法根据新的种子计算随机数。</li>
+</ul>
+<p>总结下：每个Random实例里面有一个原子性的种子变量用来记录当前的种子的值，当要生成新的随机数时候要根据当前种子计算新的种子并更新回原子变量。多线程下使用单个Random实例生成随机数时候，多个线程同时计算随机数计算新的种子时候多个线程会竞争同一个原子变量的更新操作，由于原子变量的更新是CAS操作，同时只有一个线程会成功，所以会造成大量线程进行自旋重试，这是会降低并发性能的，所以ThreadLocalRandom应运而生。</p>
+<h1 id="1-2-ThreadLocalRandom"><a href="#1-2-ThreadLocalRandom" class="headerlink" title="1.2. ThreadLocalRandom"></a>1.2. ThreadLocalRandom</h1><p>为了解决多线程高并发下Random的缺陷，JUC包下新增了ThreadLocalRandom类，下面首先看下它如何使用：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RandomTest</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//(10)获取一个随机数生成器</span></span><br><span class="line">        ThreadLocalRandom random =  ThreadLocalRandom.current();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//(11)输出10个在0-5（包含0，不包含5）之间的随机数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; ++i) &#123;</span><br><span class="line">            System.out.println(random.nextInt(<span class="number">5</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如上代码（10）调用ThreadLocalRandom.current()来获取当前线程的随机数生成器。下面来分析下ThreadLocalRandom的实现原理。从名字看会让我们联想到基础篇讲解的ThreadLocal，ThreadLocal的出现就是为了解决多线程访问一个变量时候需要进行同步的问题，让每一个线程拷贝一份变量，每个线程对变量进行操作时候实际是操作自己本地内存里面的拷贝，从而避免了对共享变量进行同步。实际上ThreadLocalRandom的实现也是这个原理，Random的缺点是多个线程会使用原子性种子变量，会导致对原子变量更新的竞争，如下图：</p>
+<p><img src="5879294-f28b763a7bc5cebe.png" alt=""></p>
+<p>那么如果每个线程维护自己的一个种子变量，每个线程生成随机数时候根据自己老的种子计算新的种子，并使用新种子更新老的种子，然后根据新种子计算随机数，就不会存在竞争问题，这会大大提高并发性能，如下图ThreadLocalRandom原理：</p>
+<p><img src="5879294-4c58aad729e49293.png" alt=""></p>
+<h2 id="1-3-源码分析"><a href="#1-3-源码分析" class="headerlink" title="1.3 源码分析"></a>1.3 源码分析</h2><p>首先看下ThreadLocalRandom的类图结构：</p>
+<p><img src="5879294-de63d1e5f21bd72c.png" alt=""></p>
+<p>可知ThreadLocalRandom继承了Random并重写了nextInt方法，ThreadLocalRandom中并没有使用继承自Random的原子性种子变量。ThreadLocalRandom中并没有具体存放种子，具体的种子是存放到具体的调用线程的threadLocalRandomSeed变量里面的，ThreadLocalRandom类似于ThreadLocal类就是个工具类。当线程调用ThreadLocalRandom的current方法时候ThreadLocalRandom负责初始化调用线程的<br>threadLocalRandomSeed变量，也就是初始化种子。当调用ThreadLocalRandom的nextInt方法时候，实际上是获取当前线程的threadLocalRandomSeed变量作为当前种子来计算新的种子，然后更新新的种子到当前线程的threadLocalRandomSeed变量，然后在根据新种子和具体算法计算随机数。这里需要注意的是threadLocalRandomSeed变量就是Thread类里面的一个普通long变量，并不是原子性变量，其实道理很简单，因为这个变量是线程级别的，根本不需要使用原子性变量，如果还是不理解可以思考下ThreadLocal的原理。</p>
+<p>其中变量seeder和probeGenerator是两个原子性变量，在初始化调用线程的种子和探针变量时候用到，每个线程只会使用一次。</p>
+<p>另外变量instance是个ThreadLocalRandom的一个实例，该变量是static的，当多线程通过ThreadLocalRandom的current方法获取ThreadLocalRandom的实例时候其实获取的是同一个，但是由于具体的种子是存放到线程里面的，所以ThreadLocalRandom的实例里面只是与线程无关的通用算法，所以是线程安全的。</p>
+<p>下面看看ThreadLocalRandom的主要代码实现逻辑</p>
+<ul>
+<li>Unsafe 机制的使用</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> sun.misc.Unsafe UNSAFE;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> SEED;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> PROBE;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> SECONDARY;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//获取unsafe实例</span></span><br><span class="line">            UNSAFE = sun.misc.Unsafe.getUnsafe();</span><br><span class="line">            Class&lt;?&gt; tk = Thread.class;</span><br><span class="line">            <span class="comment">//获取Thread类里面threadLocalRandomSeed变量在Thread实例里面偏移量</span></span><br><span class="line">            SEED = UNSAFE.objectFieldOffset</span><br><span class="line">                (tk.getDeclaredField(<span class="string">"threadLocalRandomSeed"</span>));</span><br><span class="line">            <span class="comment">//获取Thread类里面threadLocalRandomProbe变量在Thread实例里面偏移量</span></span><br><span class="line">            PROBE = UNSAFE.objectFieldOffset</span><br><span class="line">                (tk.getDeclaredField(<span class="string">"threadLocalRandomProbe"</span>));</span><br><span class="line">            <span class="comment">//获取Thread类里面threadLocalRandomProbe变量在Thread实例里面偏移量</span></span><br><span class="line">            SECONDARY = UNSAFE.objectFieldOffset</span><br><span class="line">                (tk.getDeclaredField(<span class="string">"threadLocalRandomSecondarySeed"</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>ThreadLocalRandom current()方法：该方法获取ThreadLocalRandom实例，并初始化调用线程中threadLocalRandomSeed和threadLocalRandomProbe变量。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> ThreadLocalRandom instance = <span class="keyword">new</span> ThreadLocalRandom();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ThreadLocalRandom <span class="title">current</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//(12)</span></span><br><span class="line">        <span class="keyword">if</span> (UNSAFE.getInt(Thread.currentThread(), PROBE) == <span class="number">0</span>)</span><br><span class="line">            <span class="comment">//(13)</span></span><br><span class="line">            localInit();</span><br><span class="line">        <span class="comment">//(14)</span></span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">localInit</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> p = probeGenerator.addAndGet(PROBE_INCREMENT);</span><br><span class="line">    <span class="keyword">int</span> probe = (p == <span class="number">0</span>) ? <span class="number">1</span> : p; <span class="comment">// skip 0</span></span><br><span class="line">    <span class="keyword">long</span> seed = mix64(seeder.getAndAdd(SEEDER_INCREMENT));</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    UNSAFE.putLong(t, SEED, seed);</span><br><span class="line">    UNSAFE.putInt(t, PROBE, probe);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码（12）如果当前线程中threadLocalRandomProbe变量值为0（默认情况下线程的这个变量为0），说明当前线程第一次调用ThreadLocalRandom的current方法，那么就需要调用localInit方法计算当前线程的初始化种子变量。这里设计为了延迟初始化，不需要使用随机数功能时候Thread类中的种子变量就不需要被初始化，这是一种优化。</p>
+<p>代码（13）首先计算根据probeGenerator计算当前线程中threadLocalRandomProbe的初始化值，然后根据seeder计算当前线程的初始化种子，然后把这两个变量设置到当前线程。<br>代码（14）返回ThreadLocalRandom的实例，需要注意的是这个方法是静态方法，多个线程返回的是同一个ThreadLocalRandom实例。</p>
+<ul>
+<li>int nextInt(int bound)方法：计算当前线程的下一个随机数</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nextInt</span><span class="params">(<span class="keyword">int</span> bound)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//(15)参数校验</span></span><br><span class="line">    <span class="keyword">if</span> (bound &lt;= <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(BadBound);</span><br><span class="line">    <span class="comment">//(16) 根据当前线程中种子计算新种子</span></span><br><span class="line">    <span class="keyword">int</span> r = mix32(nextSeed());</span><br><span class="line">    <span class="comment">//(17)根据新种子和bound计算随机数</span></span><br><span class="line">    <span class="keyword">int</span> m = bound - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> ((bound &amp; m) == <span class="number">0</span>) <span class="comment">// power of two</span></span><br><span class="line">        r &amp;= m;</span><br><span class="line">    <span class="keyword">else</span> &#123; <span class="comment">// reject over-represented candidates</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> u = r &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">             u + m - (r = u % bound) &lt; <span class="number">0</span>;</span><br><span class="line">             u = mix32(nextSeed()) &gt;&gt;&gt; <span class="number">1</span>)</span><br><span class="line">            ;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码逻辑步骤与Random相似，我们重点看下nextSeed()方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">long</span> <span class="title">nextSeed</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Thread t; <span class="keyword">long</span> r; <span class="comment">// </span></span><br><span class="line">    UNSAFE.putLong(t = Thread.currentThread(), SEED,</span><br><span class="line">                   r = UNSAFE.getLong(t, SEED) + GAMMA);</span><br><span class="line">    <span class="keyword">return</span> r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码首先使用 r = UNSAFE.getLong(t, SEED)获取当前线程中threadLocalRandomSeed变量的值，然后在种子的基础上累加GAMMA值作为新种子，然后使用UNSAFE的putLong方法把新种子放入当前线程的threadLocalRandomSeed变量。</p>
+<h2 id="1-4-总结"><a href="#1-4-总结" class="headerlink" title="1.4 总结"></a>1.4 总结</h2><p>本节首先讲解了Random的实现原理以及介绍了Random在多线程下存在竞争种子原子变量更新操作失败后自旋等待的缺点，从而引出ThreadLocalRandom类，ThreadLocalRandom使用ThreadLocal的原理，让每个线程内持有一个本地的种子变量，该种子变量只有在使用随机数时候才会被初始化，多线程下计算新种子时候是根据自己线程内维护的种子变量进行更新，从而避免了竞争</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/" title="并发包中ThreadLocalRandom类原理剖析" target="_blank" rel="external">http://blog.shagle.cn/2019/03/22/并发包中ThreadLocalRandom类原理剖析/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="/" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="/" target="_blank"><span class="text-dark">波哥</span><small class="ml-1x">Java Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2019/03/22/String和StringBuffer和StringBuilder/" title="String和StringBuffer和StringBuilder"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av.js"></script>
+  <script src="//unpkg.com/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: true,
+    notify: false,
+    appId: 'Muwda2bDL8O5i5pKEdIpN23P-gzGzoHsz',
+    appKey: 'P9KEnaQt3ucxmcqtGKHStMHu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
