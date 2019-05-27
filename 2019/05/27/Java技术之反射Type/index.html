@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="个人博客">
 <meta property="og:description" content="1. Type的简介java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。 在API文档中，Type接口的说明如下  Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  从JDK1.5开始使用。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-05-27T01:56:53.000Z">
+<meta property="og:updated_time" content="2019-05-27T02:01:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java技术之反射Type">
 <meta name="twitter:description" content="1. Type的简介java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。 在API文档中，Type接口的说明如下  Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  从JDK1.5开始使用。">
@@ -446,7 +446,7 @@
 </blockquote>
 <p>那么java会选择Class来作为这个Type的实现类，我们甚至可以直接把这个Type强行转换类型为Class。</p>
 <p>这些类基本都有一个特点：基本和泛型无关，其他4种Type的类型，基本都是泛型的各种形态。</p>
-<p>所以第一个参数的测试代码：</p>
+<p><strong>所以第一个参数的测试代码：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一个参数，TestReflect p0</span></span><br><span class="line">Class type0=(Class)types[<span class="number">0</span>];</span><br><span class="line">System.out.println(type0.getName());</span><br></pre></td></tr></table></figure>
 <p>输出的结果是：</p>
 <blockquote>
@@ -456,12 +456,14 @@
 <h2 id="3-2-ParameterizedType"><a href="#3-2-ParameterizedType" class="headerlink" title="3.2 ParameterizedType"></a>3.2 ParameterizedType</h2><p>当需要描述的类是泛型类时，比如List,Map等，不论代码里写没写具体的泛型，java会选择ParameterizedType接口做为Type的实现。</p>
 <p>真正的实现类是sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl。</p>
 <p>ParameterizedType接口有getActualTypeArguments()方法，用于得到泛型的Type类型数组。</p>
-<p>第二个参数的测试代码：</p>
+<p><strong>第二个参数的测试代码：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第二个参数，List&lt; TestReflect &gt; p1</span></span><br><span class="line">Type type1=types[<span class="number">1</span>];</span><br><span class="line">Type[] parameterizedType1=((ParameterizedType)type1).getActualTypeArguments();</span><br><span class="line">Class parameterizedType1_0=(Class)parameterizedType1[<span class="number">0</span>];</span><br><span class="line">System.out.println(parameterizedType1_0.getName());</span><br></pre></td></tr></table></figure>
 <p>type1是List&lt; TestReflect &gt;，List就属于泛型类，所以java选择ParameterizedType作为type1的实现，type1可以直接转换类型为ParameterizedType。</p>
 <p>List的泛型中只能写一个类型，所以parameterizedType1数组长度只能是1，本例中泛型是TestReflect，是一个普通类，他的Type被java用Class来实现，也就是变量parameterizedType1_0，所以代码最后输出：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parameterizedType1_0:com.webx.TestReflect</span><br></pre></td></tr></table></figure>
-<p>第三个参数的测试代码：</p>
+<blockquote>
+<p>parameterizedType1_0:com.webx.TestReflect</p>
+</blockquote>
+<p><strong>第三个参数的测试代码：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第三个参数，Map&lt;String,TestReflect&gt; p2</span></span><br><span class="line">Type type2=types[<span class="number">2</span>];</span><br><span class="line">Type[] parameterizedType2=((ParameterizedType)type2).getActualTypeArguments();</span><br><span class="line">Class parameterizedType2_0=(Class)parameterizedType2[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"parameterizedType2_0:"</span>+parameterizedType2_0.getName());</span><br><span class="line">Class parameterizedType2_1=(Class)parameterizedType2[<span class="number">1</span>];</span><br><span class="line">System.out.println(<span class="string">"parameterizedType2_1:"</span>+parameterizedType2_1.getName());</span><br></pre></td></tr></table></figure>
 <p>type2是Map&lt;String,TestReflect&gt;，Map属于泛型类，同样java选择ParameterizedType作为type2的实现，type2可以直接转换类型为ParameterizedType。</p>
 <p>使用getActualTypeArguments()得到的泛型类型数组parameterizedType2有两个元素，因为Map在泛型中可以写两个类型，本例中Map的泛型类型分别是String类和TestReflect，他们的Type都会被java用Class来实现，所以最后输出的是：</p>
@@ -474,7 +476,7 @@
 <h2 id="3-3-GenericArrayType"><a href="#3-3-GenericArrayType" class="headerlink" title="3.3 GenericArrayType"></a>3.3 GenericArrayType</h2><p>当需要描述的类型是泛型类的数组时，比如比如List[],Map[]，type会用GenericArrayType接口作为Type的实现。</p>
 <p>真正的实现类是sun.reflect.generics.reflectiveObjects. GenericArrayTypeImpl。</p>
 <p>GenericArrayType接口有getGenericComponentType()方法，得到数组的组件类型的Type对象。</p>
-<p>第四个参数的测试代码：</p>
+<p><strong>第四个参数的测试代码：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第四个参数，List&lt;String&gt;[] p3</span></span><br><span class="line">Type type3=types[<span class="number">3</span>];</span><br><span class="line">Type genericArrayType3=((GenericArrayType)type3).getGenericComponentType();</span><br><span class="line">ParameterizedType parameterizedType3=(ParameterizedType)genericArrayType3;</span><br><span class="line">Type[] parameterizedType3Arr=parameterizedType3.getActualTypeArguments();</span><br><span class="line">Class class3=(Class)parameterizedType3Arr[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"class3:"</span>+class3.getName());</span><br></pre></td></tr></table></figure>
 <p>type3是List<string>[]，所以java选择GenericArrayType作为type3的实现，type3可以直接转换类型为GenericArrayType。</string></p>
 <p>调用getGenericComponentType()方法，得到数组的组件类型的Type对象，也就是本例中的变量genericArrayType3，他代表的是List<string>类。</string></p>
@@ -484,7 +486,7 @@
 <blockquote>
 <p>class3:java.lang.String</p>
 </blockquote>
-<p>第五个参数的测试代码：</p>
+<p><strong>第五个参数的测试代码：</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第五个参数，Map&lt;String,TestReflect&gt;[] p4</span></span><br><span class="line">Type type4=types[<span class="number">4</span>];</span><br><span class="line">Type genericArrayType4=((GenericArrayType)type4).getGenericComponentType();</span><br><span class="line">ParameterizedType parameterizedType4=(ParameterizedType)genericArrayType4;</span><br><span class="line">Type[] parameterizedType4Arr=parameterizedType4.getActualTypeArguments();</span><br><span class="line">Class class4_0=(Class)parameterizedType4Arr[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"class4_0:"</span>+class4_0.getName());</span><br><span class="line">Class class4_1=(Class)parameterizedType4Arr[<span class="number">1</span>];</span><br><span class="line">System.out.println(<span class="string">"class4_1:"</span>+class4_1.getName());</span><br></pre></td></tr></table></figure>
 <p>type4是Map&lt;String,TestReflect&gt;[]，所以java选择GenericArrayType作为type4的实现，type4可以直接转换类型为GenericArrayType。</p>
 <p>调用getGenericComponentType()方法，得到数组的组件类型的Type对象，也就是本例中的变量genericArrayType4，他代表的是Map&lt;String,TestReflect&gt;类型。</p>
@@ -501,12 +503,12 @@
 <p>真正的实现类是sun.reflect.generics.reflectiveObjects. WildcardTypeImpl。</p>
 <p>WildcardType接口有getUpperBounds()方法，得到的是类型的上边界的Type数组，实际上就是类型的直接父类，也就是extends后面的类型。显然在当前java的设定中，这个数组只可能有一个元素，因为java现在只能extends一个类。如果实在没写extends，那他的直接父类就是Object。</p>
 <p>WildcardType接口有getLowerBounds()方法，得到的是类型的下边界的Type数组，有super关键字时可能会用到，经测试不会得到类型的子类，而是只得到super关键字后面的类型，如果没写super关键字，则返回空数组。</p>
-<p>第六个参数的测试代码:</p>
+<p><strong>第六个参数的测试代码:</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第六个参数，List&lt;? extends TestReflect&gt; p5</span></span><br><span class="line">Type type5=types[<span class="number">5</span>];</span><br><span class="line">Type[] parameterizedType5=((ParameterizedType)type5).getActualTypeArguments();</span><br><span class="line">Type[] parameterizedType5_0_upper=((WildcardType)parameterizedType5[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType5_0_lower=((WildcardType)parameterizedType5[<span class="number">0</span>]).getLowerBounds();</span><br></pre></td></tr></table></figure>
 <p>type5代表List&lt;? extends TestReflect&gt;，用ParameterizedType实现。</p>
 <p>调用getActualTypeArguments()方法后，得到只有一个元素的Type数组，这个元素就代表(? extends TestReflect)</p>
 <p>把这个Type元素转成WildcardType后，可以调用getUpperBounds()和getLowerBounds()方法得到上边界和下边界，在本例中的上边界就是变量parameterizedType5_0_upper，只有一个元素，该元素代表TestReflect类型，下边界是变量parameterizedType5_0_lower，是个空数组。</p>
-<p>第七个参数的测试代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第七个参数，Map&lt;? extends TestReflect,? super TestReflect&gt; p6</span></span><br><span class="line">Type type6=types[<span class="number">6</span>];</span><br><span class="line">Type[] parameterizedType6=((ParameterizedType)type6).getActualTypeArguments();</span><br><span class="line">Type[] parameterizedType6_0_upper=((WildcardType)parameterizedType6[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_0_lower=((WildcardType)parameterizedType6[<span class="number">0</span>]).getLowerBounds();</span><br><span class="line">Type[] parameterizedType6_1_upper=((WildcardType)parameterizedType6[<span class="number">1</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_1_lower=((WildcardType)parameterizedType6[<span class="number">1</span>]).getLowerBounds();</span><br></pre></td></tr></table></figure></p>
+<p><strong>第七个参数的测试代码：</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第七个参数，Map&lt;? extends TestReflect,? super TestReflect&gt; p6</span></span><br><span class="line">Type type6=types[<span class="number">6</span>];</span><br><span class="line">Type[] parameterizedType6=((ParameterizedType)type6).getActualTypeArguments();</span><br><span class="line">Type[] parameterizedType6_0_upper=((WildcardType)parameterizedType6[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_0_lower=((WildcardType)parameterizedType6[<span class="number">0</span>]).getLowerBounds();</span><br><span class="line">Type[] parameterizedType6_1_upper=((WildcardType)parameterizedType6[<span class="number">1</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_1_lower=((WildcardType)parameterizedType6[<span class="number">1</span>]).getLowerBounds();</span><br></pre></td></tr></table></figure></p>
 <p>type6代表Map&lt;? extends TestReflect,? super TestReflect&gt;，用ParameterizedType实现。</p>
 <p>调用getActualTypeArguments()方法后，得到有两个元素的Type数组，两个元素分别代表(? extends TestReflect)和(? super TestReflect)</p>
 <p>把这两个Type元素转成WildcardType后，可以调用getUpperBounds()和getLowerBounds()方法得到上边界和下边界。</p>
