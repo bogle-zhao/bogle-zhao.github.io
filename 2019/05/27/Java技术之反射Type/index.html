@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>Java技术之反射Type | 赵波的技术博客</title>
+  <meta name="description" content="1. Type的简介java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。 在API文档中，Type接口的说明如下  Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  从JDK1.5开始使用。">
+<meta name="keywords" content="type">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java技术之反射Type">
+<meta property="og:url" content="http://blog.shagle.cn/2019/05/27/Java技术之反射Type/index.html">
+<meta property="og:site_name" content="个人博客">
+<meta property="og:description" content="1. Type的简介java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。 在API文档中，Type接口的说明如下  Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  从JDK1.5开始使用。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-27T01:56:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java技术之反射Type">
+<meta name="twitter:description" content="1. Type的简介java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。 在API文档中，Type接口的说明如下  Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。  从JDK1.5开始使用。">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://blog.shagle.cn/2019/05/27/Java技术之反射Type/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="个人博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center theme-purple" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="/" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">波哥</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> ChengDu, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/HttpClient/">HttpClient</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/I-O/">I/O</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java8/">Java8</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java中String、StringBuffer、StringBuilder的区别/">Java中String、StringBuffer、StringBuilder的区别</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java并发/">Java并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/">Java技术</a><span class="category-list-count">26</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/多线程/">多线程</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQ/">MQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NoSql/">NoSql</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-MVC/">Spring MVC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/">Spring源码深度解析</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/Spring/">Spring</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ribbon/">ribbon</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/rpc/">rpc</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet/">servlet</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/">servlet3.0</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/spring-mvc/">spring mvc</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">32</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/Zookeeper/">Zookeeper</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程术语/">编程术语</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AES/">AES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AOP/">AOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AQS/">AQS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ApplicationEvent/">ApplicationEvent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ArrayList/">ArrayList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BOP/">BOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bean/">Bean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanDefinitionReader/">BeanDefinitionReader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanFactoryPostProcessor/">BeanFactoryPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanPostProcessor/">BeanPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Callable/">Callable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ComponentScan/">ComponentScan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Conditional/">Conditional</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DES/">DES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DI-DL/">DI/DL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FactoryBean/">FactoryBean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Future/">Future</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FutureTask/">FutureTask</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hash/">Hash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HttpURLConnection/">HttpURLConnection</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O多路复用/">I/O多路复用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/">IOC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/InputStream/">InputStream</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LRU/">LRU</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Lazy-bean注解/">Lazy-bean注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LinkedList/">LinkedList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LockSupport/">LockSupport</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5withRSA/">MD5withRSA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5加密/">MD5加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-1/">O(1)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-log-n/">O(log n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-n/">O(n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertyPlaceholderConfigurer/">PropertyPlaceholderConfigurer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertySource，Environment，Profile/">PropertySource，Environment，Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Protocol-buffers/">Protocol buffers</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantLock/">ReentrantLock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantReadWriteLock/">ReentrantReadWriteLock</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource/">Resource</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceBundle/">ResourceBundle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceLoader/">ResourceLoader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource接口/">Resource接口</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Semaphore/">Semaphore</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/">Sentinel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sharding-jdbc/">Sharding-jdbc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ShardingSphere/">ShardingSphere</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SkipList跳表/">SkipList跳表</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-事件机制/">Spring 事件机制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/System-arrayCopy/">System.arrayCopy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThreadLocal/">ThreadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Zookeeper/">Zookeeper</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/">annotation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/aop/">aop</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/available/">available</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cpu/">cpu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/feign/">feign</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/getEnv/">getEnv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git多个账号配置/">git多个账号配置</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/grpc/">grpc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ignoreDependencyInterface/">ignoreDependencyInterface</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupt/">interrupt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupted/">interrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/isInterrupted/">isInterrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java8/">java8</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javabean/">javabean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/join/">join</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pojo/">pojo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ribbon/">ribbon</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/servlet3-0/">servlet3.0</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sha1加密/">sha1加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spirng-Profile/">spirng Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Autowired/">spring Autowired</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Aware/">spring Aware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Configuration注解/">spring Configuration注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Import注解/">spring Import注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Primary/">spring Primary</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource原理/">spring PropertySource原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource注解/">spring PropertySource注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Qualifier/">spring Qualifier</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Scope注解/">spring Scope注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-mvc/">spring mvc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-value注解/">spring value注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-导图/">spring 导图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-生命周期/">spring-生命周期</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/threadLocal/">threadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/type/">type</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/volatile/">volatile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/位运算/">位运算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/公钥和私钥/">公钥和私钥</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式锁/">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/占位符解析器/">占位符解析器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/国际化/">国际化</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步controller/">异步controller</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/强引用、软引用、弱引用、虚引用/">强引用、软引用、弱引用、虚引用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/熔断/">熔断</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程池/">线程池</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程通信/">线程通信</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式六大原则/">设计模式六大原则</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进制转换/">进制转换</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AES/" style="font-size: 13px;">AES</a> <a href="/tags/AOP/" style="font-size: 13px;">AOP</a> <a href="/tags/AQS/" style="font-size: 13px;">AQS</a> <a href="/tags/ApplicationEvent/" style="font-size: 13px;">ApplicationEvent</a> <a href="/tags/ArrayList/" style="font-size: 13px;">ArrayList</a> <a href="/tags/BOP/" style="font-size: 13px;">BOP</a> <a href="/tags/Bean/" style="font-size: 13px;">Bean</a> <a href="/tags/BeanDefinitionReader/" style="font-size: 13px;">BeanDefinitionReader</a> <a href="/tags/BeanFactoryPostProcessor/" style="font-size: 13px;">BeanFactoryPostProcessor</a> <a href="/tags/BeanPostProcessor/" style="font-size: 13px;">BeanPostProcessor</a> <a href="/tags/Callable/" style="font-size: 13px;">Callable</a> <a href="/tags/ComponentScan/" style="font-size: 13px;">ComponentScan</a> <a href="/tags/Conditional/" style="font-size: 13px;">Conditional</a> <a href="/tags/DES/" style="font-size: 13px;">DES</a> <a href="/tags/DI-DL/" style="font-size: 13px;">DI/DL</a> <a href="/tags/FactoryBean/" style="font-size: 13px;">FactoryBean</a> <a href="/tags/Future/" style="font-size: 13px;">Future</a> <a href="/tags/FutureTask/" style="font-size: 13.25px;">FutureTask</a> <a href="/tags/Hash/" style="font-size: 13.25px;">Hash</a> <a href="/tags/HttpURLConnection/" style="font-size: 13px;">HttpURLConnection</a> <a href="/tags/I-O多路复用/" style="font-size: 13px;">I/O多路复用</a> <a href="/tags/IOC/" style="font-size: 13.25px;">IOC</a> <a href="/tags/InputStream/" style="font-size: 13px;">InputStream</a> <a href="/tags/Java/" style="font-size: 13.5px;">Java</a> <a href="/tags/LRU/" style="font-size: 13px;">LRU</a> <a href="/tags/Lazy-bean注解/" style="font-size: 13px;">Lazy-bean注解</a> <a href="/tags/LinkedList/" style="font-size: 13px;">LinkedList</a> <a href="/tags/LockSupport/" style="font-size: 13px;">LockSupport</a> <a href="/tags/MD5withRSA/" style="font-size: 13px;">MD5withRSA</a> <a href="/tags/MD5加密/" style="font-size: 13px;">MD5加密</a> <a href="/tags/O-1/" style="font-size: 13px;">O(1)</a> <a href="/tags/O-log-n/" style="font-size: 13px;">O(log n)</a> <a href="/tags/O-n/" style="font-size: 13px;">O(n)</a> <a href="/tags/OOP/" style="font-size: 13px;">OOP</a> <a href="/tags/PropertyPlaceholderConfigurer/" style="font-size: 13px;">PropertyPlaceholderConfigurer</a> <a href="/tags/PropertySource，Environment，Profile/" style="font-size: 13px;">PropertySource，Environment，Profile</a> <a href="/tags/Protocol-buffers/" style="font-size: 13px;">Protocol buffers</a> <a href="/tags/ReentrantLock/" style="font-size: 13px;">ReentrantLock</a> <a href="/tags/ReentrantReadWriteLock/" style="font-size: 13.25px;">ReentrantReadWriteLock</a> <a href="/tags/Resource/" style="font-size: 13px;">Resource</a> <a href="/tags/ResourceBundle/" style="font-size: 13px;">ResourceBundle</a> <a href="/tags/ResourceLoader/" style="font-size: 13px;">ResourceLoader</a> <a href="/tags/Resource接口/" style="font-size: 13px;">Resource接口</a> <a href="/tags/Semaphore/" style="font-size: 13px;">Semaphore</a> <a href="/tags/Sentinel/" style="font-size: 13px;">Sentinel</a> <a href="/tags/Sharding-jdbc/" style="font-size: 13px;">Sharding-jdbc</a> <a href="/tags/ShardingSphere/" style="font-size: 13px;">ShardingSphere</a> <a href="/tags/SkipList跳表/" style="font-size: 13px;">SkipList跳表</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/Spring-事件机制/" style="font-size: 13px;">Spring 事件机制</a> <a href="/tags/System-arrayCopy/" style="font-size: 13px;">System.arrayCopy</a> <a href="/tags/ThreadLocal/" style="font-size: 13px;">ThreadLocal</a> <a href="/tags/Zookeeper/" style="font-size: 13px;">Zookeeper</a> <a href="/tags/annotation/" style="font-size: 13px;">annotation</a> <a href="/tags/aop/" style="font-size: 13px;">aop</a> <a href="/tags/available/" style="font-size: 13px;">available</a> <a href="/tags/cpu/" style="font-size: 13px;">cpu</a> <a href="/tags/feign/" style="font-size: 13.25px;">feign</a> <a href="/tags/getEnv/" style="font-size: 13px;">getEnv</a> <a href="/tags/git多个账号配置/" style="font-size: 13px;">git多个账号配置</a> <a href="/tags/grpc/" style="font-size: 13px;">grpc</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/ignoreDependencyInterface/" style="font-size: 13px;">ignoreDependencyInterface</a> <a href="/tags/interrupt/" style="font-size: 13px;">interrupt</a> <a href="/tags/interrupted/" style="font-size: 13px;">interrupted</a> <a href="/tags/isInterrupted/" style="font-size: 13px;">isInterrupted</a> <a href="/tags/java8/" style="font-size: 13px;">java8</a> <a href="/tags/javabean/" style="font-size: 13px;">javabean</a> <a href="/tags/join/" style="font-size: 13px;">join</a> <a href="/tags/jvm/" style="font-size: 13px;">jvm</a> <a href="/tags/kafka/" style="font-size: 13px;">kafka</a> <a href="/tags/pojo/" style="font-size: 13px;">pojo</a> <a href="/tags/redis/" style="font-size: 13.75px;">redis</a> <a href="/tags/ribbon/" style="font-size: 13.25px;">ribbon</a> <a href="/tags/servlet3-0/" style="font-size: 13.25px;">servlet3.0</a> <a href="/tags/sha1加密/" style="font-size: 13px;">sha1加密</a> <a href="/tags/spirng-Profile/" style="font-size: 13px;">spirng Profile</a> <a href="/tags/spring/" style="font-size: 13.25px;">spring</a> <a href="/tags/spring-Autowired/" style="font-size: 13px;">spring Autowired</a> <a href="/tags/spring-Aware/" style="font-size: 13px;">spring Aware</a> <a href="/tags/spring-Configuration注解/" style="font-size: 13px;">spring Configuration注解</a> <a href="/tags/spring-Import注解/" style="font-size: 13px;">spring Import注解</a> <a href="/tags/spring-Primary/" style="font-size: 13px;">spring Primary</a> <a href="/tags/spring-PropertySource原理/" style="font-size: 13px;">spring PropertySource原理</a> <a href="/tags/spring-PropertySource注解/" style="font-size: 13px;">spring PropertySource注解</a> <a href="/tags/spring-Qualifier/" style="font-size: 13px;">spring Qualifier</a> <a href="/tags/spring-Scope注解/" style="font-size: 13px;">spring Scope注解</a> <a href="/tags/spring-mvc/" style="font-size: 13px;">spring mvc</a> <a href="/tags/spring-value注解/" style="font-size: 13px;">spring value注解</a> <a href="/tags/spring-导图/" style="font-size: 13px;">spring 导图</a> <a href="/tags/spring-生命周期/" style="font-size: 13px;">spring-生命周期</a> <a href="/tags/threadLocal/" style="font-size: 13px;">threadLocal</a> <a href="/tags/type/" style="font-size: 13px;">type</a> <a href="/tags/volatile/" style="font-size: 13px;">volatile</a> <a href="/tags/位运算/" style="font-size: 13px;">位运算</a> <a href="/tags/公钥和私钥/" style="font-size: 13px;">公钥和私钥</a> <a href="/tags/分布式锁/" style="font-size: 13px;">分布式锁</a> <a href="/tags/占位符解析器/" style="font-size: 13px;">占位符解析器</a> <a href="/tags/国际化/" style="font-size: 13.25px;">国际化</a> <a href="/tags/异步controller/" style="font-size: 13px;">异步controller</a> <a href="/tags/强引用、软引用、弱引用、虚引用/" style="font-size: 13px;">强引用、软引用、弱引用、虚引用</a> <a href="/tags/熔断/" style="font-size: 13px;">熔断</a> <a href="/tags/线程池/" style="font-size: 13px;">线程池</a> <a href="/tags/线程通信/" style="font-size: 13px;">线程通信</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/设计模式六大原则/" style="font-size: 13px;">设计模式六大原则</a> <a href="/tags/进制转换/" style="font-size: 13px;">进制转换</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">33</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java技术/">Java技术</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/05/27/Java技术之反射Type/" class="title">Java技术之反射Type</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-05-27T01:43:03.000Z" itemprop="datePublished">2019-05-27</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2019/05/13/导图1/" class="title">(no title)</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-05-13T05:35:06.000Z" itemprop="datePublished">2019-05-13</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/git/">git</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/05/06/git多个账号配置/" class="title">git多个账号配置</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-05-06T03:20:23.000Z" itemprop="datePublished">2019-05-06</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/22/并发包中ThreadLocalRandom类原理剖析/" class="title">并发包中ThreadLocalRandom类原理剖析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-22T07:13:26.000Z" itemprop="datePublished">2019-03-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java中String、StringBuffer、StringBuilder的区别/">Java中String、StringBuffer、StringBuilder的区别</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/03/22/String和StringBuffer和StringBuilder/" class="title">String和StringBuffer和StringBuilder</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-03-22T06:13:28.000Z" itemprop="datePublished">2019-03-22</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="main-center-Java技术之反射Type" class="article article-type-main-center" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java技术之反射Type
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/05/27/Java技术之反射Type/" class="article-date">
+	  <time datetime="2019-05-27T01:43:03.000Z" itemprop="datePublished">2019-05-27</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/Java技术/">Java技术</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/type/">type</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/05/27/Java技术之反射Type/" class="leancloud_visitors" data-flag-title="Java技术之反射Type">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/05/27/Java技术之反射Type/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 11(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="1-Type的简介"><a href="#1-Type的简介" class="headerlink" title="1. Type的简介"></a>1. Type的简介</h1><p>java.lang.reflect.Type接口及其相关接口用于描述java中用到的所有类型，是Java的反射中很重要的组成部分。</p>
+<p>在API文档中，Type接口的说明如下</p>
+<blockquote>
+<p>Type 是 Java 编程语言中所有类型的公共高级接口。它们包括原始类型、参数化类型、数组类型、类型变量和基本类型。<br>  从JDK1.5开始使用。</p>
+</blockquote>
+<a id="more"></a>
+<p>API中提到的Type的组成部分说明如下：</p>
+<blockquote>
+<ul>
+<li>原始类型：一般意义上的java类，由class类实现</li>
+<li>参数化类型：ParameterizedType接口的实现类</li>
+<li>数组类型：GenericArrayType接口的实现类</li>
+<li>类型变量：TypeVariable接口的实现类</li>
+<li>基本类型：int，float等java基本类型，其实也是class</li>
+</ul>
+</blockquote>
+<p>不知道为什么在文档中介绍Type接口的组成时，没有包含WildcardType接口。</p>
+<h1 id="2-Type的获得"><a href="#2-Type的获得" class="headerlink" title="2. Type的获得"></a>2. Type的获得</h1><p>有很多场景下我们可以获得Type，比如：</p>
+<p>1，当我们拿到一个Class，用Class. getGenericInterfaces()方法得到Type[]，也就是这个类实现接口的Type类型列表。</p>
+<p>2，当我们拿到一个Class，用Class.getDeclaredFields()方法得到Field[]，也就是类的属性列表，然后用Field. getGenericType()方法得到这个属性的Type类型。</p>
+<p>3，当我们拿到一个Method，用Method. getGenericParameterTypes()方法获得Type[]，也就是方法的参数类型列表。</p>
+<h1 id="3-Type的分类"><a href="#3-Type的分类" class="headerlink" title="3. Type的分类"></a>3. Type的分类</h1><p>Type接口包含了一个实现类(Class)和四个实现接口(TypeVariable, ParameterizedType, GenericArrayType, WildcardType)，这四个接口都有自己的实现类，但这些实现类开发都不能直接使用，只能用接口。</p>
+<p>在不同的场景下，java会使用上面五种实现类的其中一种，来解释要描述的类型。</p>
+<p>下面详细解释一下java是怎么在这五种实现类中选择的。</p>
+<p>以方法的参数为例，写一段示例代码，重点关注其中的test方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestReflect</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">(TestReflect p0,</span></span></span><br><span class="line"><span class="function"><span class="params">    		List&lt;TestReflect&gt; p1,</span></span></span><br><span class="line"><span class="function"><span class="params">    		Map&lt;String,TestReflect&gt; p2,</span></span></span><br><span class="line"><span class="function"><span class="params">    		List&lt;String&gt;[] p3,</span></span></span><br><span class="line"><span class="function"><span class="params">    		Map&lt;String,TestReflect&gt;[] p4,</span></span></span><br><span class="line"><span class="function"><span class="params">    		List&lt;? extends TestReflect&gt; p5,</span></span></span><br><span class="line"><span class="function"><span class="params">    		Map&lt;? extends TestReflect,? <span class="keyword">super</span> TestReflect&gt; p6</span></span></span><br><span class="line"><span class="function"><span class="params">    		//T p7</span></span></span><br><span class="line"><span class="function"><span class="params">    		)</span></span>&#123;</span><br><span class="line">    	</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    	</span><br><span class="line">		Method[] methods=TestReflect.class.getMethods();</span><br><span class="line"> </span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;methods.length;i++)&#123;</span><br><span class="line">			Method oneMethod=methods[i];</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">if</span>(oneMethod.getName().equals(<span class="string">"test"</span>))&#123;</span><br><span class="line">				Type[] types=oneMethod.getGenericParameterTypes();</span><br><span class="line">				</span><br><span class="line">				<span class="comment">//第一个参数，TestReflect p0</span></span><br><span class="line">				Class type0=(Class)types[<span class="number">0</span>];</span><br><span class="line">				System.out.println(<span class="string">"type0:"</span>+type0.getName());</span><br><span class="line">				</span><br><span class="line">				<span class="comment">//第二个参数，List&lt;TestReflect&gt; p1</span></span><br><span class="line">				Type type1=types[<span class="number">1</span>];</span><br><span class="line">				Type[] parameterizedType1=((ParameterizedType)type1).getActualTypeArguments();</span><br><span class="line">				Class parameterizedType1_0=(Class)parameterizedType1[<span class="number">0</span>];</span><br><span class="line">				System.out.println(<span class="string">"parameterizedType1_0:"</span>+parameterizedType1_0.getName());</span><br><span class="line">				</span><br><span class="line">				<span class="comment">//第三个参数，Map&lt;String,TestReflect&gt; p2</span></span><br><span class="line">				Type type2=types[<span class="number">2</span>];</span><br><span class="line">				Type[] parameterizedType2=((ParameterizedType)type2).getActualTypeArguments();</span><br><span class="line">				Class parameterizedType2_0=(Class)parameterizedType2[<span class="number">0</span>];</span><br><span class="line">				System.out.println(<span class="string">"parameterizedType2_0:"</span>+parameterizedType2_0.getName());</span><br><span class="line">				Class parameterizedType2_1=(Class)parameterizedType2[<span class="number">1</span>];</span><br><span class="line">				System.out.println(<span class="string">"parameterizedType2_1:"</span>+parameterizedType2_1.getName());</span><br><span class="line">				</span><br><span class="line"> </span><br><span class="line">				<span class="comment">//第四个参数，List&lt;String&gt;[] p3</span></span><br><span class="line">				Type type3=types[<span class="number">3</span>];</span><br><span class="line">				Type genericArrayType3=((GenericArrayType)type3).getGenericComponentType();</span><br><span class="line">				ParameterizedType parameterizedType3=(ParameterizedType)genericArrayType3;</span><br><span class="line">				Type[] parameterizedType3Arr=parameterizedType3.getActualTypeArguments();</span><br><span class="line">				Class class3=(Class)parameterizedType3Arr[<span class="number">0</span>];</span><br><span class="line">				System.out.println(<span class="string">"class3:"</span>+class3.getName());</span><br><span class="line">				</span><br><span class="line">				<span class="comment">//第五个参数，Map&lt;String,TestReflect&gt;[] p4</span></span><br><span class="line">				Type type4=types[<span class="number">4</span>];</span><br><span class="line">				Type genericArrayType4=((GenericArrayType)type4).getGenericComponentType();</span><br><span class="line">				ParameterizedType parameterizedType4=(ParameterizedType)genericArrayType4;</span><br><span class="line">				Type[] parameterizedType4Arr=parameterizedType4.getActualTypeArguments();</span><br><span class="line">				Class class4_0=(Class)parameterizedType4Arr[<span class="number">0</span>];</span><br><span class="line">				System.out.println(<span class="string">"class4_0:"</span>+class4_0.getName());</span><br><span class="line">				Class class4_1=(Class)parameterizedType4Arr[<span class="number">1</span>];</span><br><span class="line">				System.out.println(<span class="string">"class4_1:"</span>+class4_1.getName());</span><br><span class="line">				</span><br><span class="line"> </span><br><span class="line">				<span class="comment">//第六个参数，List&lt;? extends TestReflect&gt; p5</span></span><br><span class="line">				Type type5=types[<span class="number">5</span>];</span><br><span class="line">				Type[] parameterizedType5=((ParameterizedType)type5).getActualTypeArguments();</span><br><span class="line">				Type[] parameterizedType5_0_upper=((WildcardType)parameterizedType5[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">				Type[] parameterizedType5_0_lower=((WildcardType)parameterizedType5[<span class="number">0</span>]).getLowerBounds();</span><br><span class="line">				</span><br><span class="line">				<span class="comment">//第七个参数，Map&lt;? extends TestReflect,? super TestReflect&gt; p6</span></span><br><span class="line">				Type type6=types[<span class="number">6</span>];</span><br><span class="line">				Type[] parameterizedType6=((ParameterizedType)type6).getActualTypeArguments();</span><br><span class="line">				Type[] parameterizedType6_0_upper=((WildcardType)parameterizedType6[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">				Type[] parameterizedType6_0_lower=((WildcardType)parameterizedType6[<span class="number">0</span>]).getLowerBounds();</span><br><span class="line">				Type[] parameterizedType6_1_upper=((WildcardType)parameterizedType6[<span class="number">1</span>]).getUpperBounds();</span><br><span class="line">				Type[] parameterizedType6_1_lower=((WildcardType)parameterizedType6[<span class="number">1</span>]).getLowerBounds();</span><br><span class="line">								</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们需要关注的就是在类中定义的test方法，这个方法的7个参数基本上涵盖了Type能用到的所有类型。</p>
+<p>所以在main方法中我们用反射得到了这个test方法，然后用method.getGenericParameterTypes()方法得到了test方法的所有参数类型，这是一个Type数组，数组中的每一个元素就是每个参数的类型，java为每一个Type选择了一个Type的实现类。</p>
+<p>以此我们可以看到java是怎么在5种实现类中选择的。</p>
+<h2 id="3-1-Class"><a href="#3-1-Class" class="headerlink" title="3.1 Class"></a>3.1 Class</h2><p>当需要描述的类型是：</p>
+<blockquote>
+<ul>
+<li>普通的java类（比如String，Integer，Method等等），</li>
+<li>数组，</li>
+<li>自定义类（比如我们自己定义的TestReflect类），</li>
+<li>8种java基本类型（比如int，float等）</li>
+<li>可能还有其他的类</li>
+</ul>
+</blockquote>
+<p>那么java会选择Class来作为这个Type的实现类，我们甚至可以直接把这个Type强行转换类型为Class。</p>
+<p>这些类基本都有一个特点：基本和泛型无关，其他4种Type的类型，基本都是泛型的各种形态。</p>
+<p>所以第一个参数的测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一个参数，TestReflect p0</span></span><br><span class="line">Class type0=(Class)types[<span class="number">0</span>];</span><br><span class="line">System.out.println(type0.getName());</span><br></pre></td></tr></table></figure>
+<p>输出的结果是：</p>
+<blockquote>
+<p>type0:com.webx.TestReflect</p>
+</blockquote>
+<p>可见第一个参数Type的实现类就是Class。</p>
+<h2 id="3-2-ParameterizedType"><a href="#3-2-ParameterizedType" class="headerlink" title="3.2 ParameterizedType"></a>3.2 ParameterizedType</h2><p>当需要描述的类是泛型类时，比如List,Map等，不论代码里写没写具体的泛型，java会选择ParameterizedType接口做为Type的实现。</p>
+<p>真正的实现类是sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl。</p>
+<p>ParameterizedType接口有getActualTypeArguments()方法，用于得到泛型的Type类型数组。</p>
+<p>第二个参数的测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第二个参数，List&lt; TestReflect &gt; p1</span></span><br><span class="line">Type type1=types[<span class="number">1</span>];</span><br><span class="line">Type[] parameterizedType1=((ParameterizedType)type1).getActualTypeArguments();</span><br><span class="line">Class parameterizedType1_0=(Class)parameterizedType1[<span class="number">0</span>];</span><br><span class="line">System.out.println(parameterizedType1_0.getName());</span><br></pre></td></tr></table></figure>
+<p>type1是List&lt; TestReflect &gt;，List就属于泛型类，所以java选择ParameterizedType作为type1的实现，type1可以直接转换类型为ParameterizedType。</p>
+<p>List的泛型中只能写一个类型，所以parameterizedType1数组长度只能是1，本例中泛型是TestReflect，是一个普通类，他的Type被java用Class来实现，也就是变量parameterizedType1_0，所以代码最后输出：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parameterizedType1_0:com.webx.TestReflect</span><br></pre></td></tr></table></figure>
+<p>第三个参数的测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第三个参数，Map&lt;String,TestReflect&gt; p2</span></span><br><span class="line">Type type2=types[<span class="number">2</span>];</span><br><span class="line">Type[] parameterizedType2=((ParameterizedType)type2).getActualTypeArguments();</span><br><span class="line">Class parameterizedType2_0=(Class)parameterizedType2[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"parameterizedType2_0:"</span>+parameterizedType2_0.getName());</span><br><span class="line">Class parameterizedType2_1=(Class)parameterizedType2[<span class="number">1</span>];</span><br><span class="line">System.out.println(<span class="string">"parameterizedType2_1:"</span>+parameterizedType2_1.getName());</span><br></pre></td></tr></table></figure>
+<p>type2是Map&lt;String,TestReflect&gt;，Map属于泛型类，同样java选择ParameterizedType作为type2的实现，type2可以直接转换类型为ParameterizedType。</p>
+<p>使用getActualTypeArguments()得到的泛型类型数组parameterizedType2有两个元素，因为Map在泛型中可以写两个类型，本例中Map的泛型类型分别是String类和TestReflect，他们的Type都会被java用Class来实现，所以最后输出的是：</p>
+<blockquote>
+<p>parameterizedType2_0:java.lang.String</p>
+</blockquote>
+<blockquote>
+<p>parameterizedType2_1:com.webx.TestReflect</p>
+</blockquote>
+<h2 id="3-3-GenericArrayType"><a href="#3-3-GenericArrayType" class="headerlink" title="3.3 GenericArrayType"></a>3.3 GenericArrayType</h2><p>当需要描述的类型是泛型类的数组时，比如比如List[],Map[]，type会用GenericArrayType接口作为Type的实现。</p>
+<p>真正的实现类是sun.reflect.generics.reflectiveObjects. GenericArrayTypeImpl。</p>
+<p>GenericArrayType接口有getGenericComponentType()方法，得到数组的组件类型的Type对象。</p>
+<p>第四个参数的测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第四个参数，List&lt;String&gt;[] p3</span></span><br><span class="line">Type type3=types[<span class="number">3</span>];</span><br><span class="line">Type genericArrayType3=((GenericArrayType)type3).getGenericComponentType();</span><br><span class="line">ParameterizedType parameterizedType3=(ParameterizedType)genericArrayType3;</span><br><span class="line">Type[] parameterizedType3Arr=parameterizedType3.getActualTypeArguments();</span><br><span class="line">Class class3=(Class)parameterizedType3Arr[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"class3:"</span>+class3.getName());</span><br></pre></td></tr></table></figure>
+<p>type3是List<string>[]，所以java选择GenericArrayType作为type3的实现，type3可以直接转换类型为GenericArrayType。</string></p>
+<p>调用getGenericComponentType()方法，得到数组的组件类型的Type对象，也就是本例中的变量genericArrayType3，他代表的是List<string>类。</string></p>
+<p>List<string>是泛型类，所以变量genericArrayType3的Type用ParameterizedType来实现，转换类型之后也就是变量parameterizedType3。</string></p>
+<p>parameterizedType3.getActualTypeArguments()得到的是List<string>类型的泛型类数组，也就是数组parameterizedType3Arr。</string></p>
+<p>数组parameterizedType3Arr只有一个元素，类型是String，这个Type由Class实现，就是变量class3，最后输出的是：</p>
+<blockquote>
+<p>class3:java.lang.String</p>
+</blockquote>
+<p>第五个参数的测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第五个参数，Map&lt;String,TestReflect&gt;[] p4</span></span><br><span class="line">Type type4=types[<span class="number">4</span>];</span><br><span class="line">Type genericArrayType4=((GenericArrayType)type4).getGenericComponentType();</span><br><span class="line">ParameterizedType parameterizedType4=(ParameterizedType)genericArrayType4;</span><br><span class="line">Type[] parameterizedType4Arr=parameterizedType4.getActualTypeArguments();</span><br><span class="line">Class class4_0=(Class)parameterizedType4Arr[<span class="number">0</span>];</span><br><span class="line">System.out.println(<span class="string">"class4_0:"</span>+class4_0.getName());</span><br><span class="line">Class class4_1=(Class)parameterizedType4Arr[<span class="number">1</span>];</span><br><span class="line">System.out.println(<span class="string">"class4_1:"</span>+class4_1.getName());</span><br></pre></td></tr></table></figure>
+<p>type4是Map&lt;String,TestReflect&gt;[]，所以java选择GenericArrayType作为type4的实现，type4可以直接转换类型为GenericArrayType。</p>
+<p>调用getGenericComponentType()方法，得到数组的组件类型的Type对象，也就是本例中的变量genericArrayType4，他代表的是Map&lt;String,TestReflect&gt;类型。</p>
+<p>Map&lt;String,TestReflect&gt;是泛型类，所以变量genericArrayType4的Type用ParameterizedType来实现，转换类型之后也就是变量parameterizedType4。</p>
+<p>parameterizedType4.getActualTypeArguments()得到的是Map&lt;String,TestReflect&gt;类型的泛型类数组，也就是变量parameterizedType4Arr。</p>
+<p>变量parameterizedType4Arr有两个元素，类型是String和TestReflect，这两个Type都由Class实现，就是变量class4_0和变量class4_1，最后输出的是：</p>
+<blockquote>
+<p>class4_0:java.lang.String</p>
+</blockquote>
+<blockquote>
+<p>class4_1:com.webx.TestReflect</p>
+</blockquote>
+<h1 id="3-4-WildcardType"><a href="#3-4-WildcardType" class="headerlink" title="3.4 WildcardType"></a>3.4 WildcardType</h1><p>当需要描述的类型是泛型类，而且泛型类中的泛型被定义为(? extends xxx)或者(? super xxx)这种类型，比如List&lt;? extends TestReflect&gt;，这个类型首先将由ParameterizedType实现，当调用ParameterizedType的getActualTypeArguments()方法后得到的Type就由WildcardType实现。</p>
+<p>真正的实现类是sun.reflect.generics.reflectiveObjects. WildcardTypeImpl。</p>
+<p>WildcardType接口有getUpperBounds()方法，得到的是类型的上边界的Type数组，实际上就是类型的直接父类，也就是extends后面的类型。显然在当前java的设定中，这个数组只可能有一个元素，因为java现在只能extends一个类。如果实在没写extends，那他的直接父类就是Object。</p>
+<p>WildcardType接口有getLowerBounds()方法，得到的是类型的下边界的Type数组，有super关键字时可能会用到，经测试不会得到类型的子类，而是只得到super关键字后面的类型，如果没写super关键字，则返回空数组。</p>
+<p>第六个参数的测试代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第六个参数，List&lt;? extends TestReflect&gt; p5</span></span><br><span class="line">Type type5=types[<span class="number">5</span>];</span><br><span class="line">Type[] parameterizedType5=((ParameterizedType)type5).getActualTypeArguments();</span><br><span class="line">Type[] parameterizedType5_0_upper=((WildcardType)parameterizedType5[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType5_0_lower=((WildcardType)parameterizedType5[<span class="number">0</span>]).getLowerBounds();</span><br></pre></td></tr></table></figure>
+<p>type5代表List&lt;? extends TestReflect&gt;，用ParameterizedType实现。</p>
+<p>调用getActualTypeArguments()方法后，得到只有一个元素的Type数组，这个元素就代表(? extends TestReflect)</p>
+<p>把这个Type元素转成WildcardType后，可以调用getUpperBounds()和getLowerBounds()方法得到上边界和下边界，在本例中的上边界就是变量parameterizedType5_0_upper，只有一个元素，该元素代表TestReflect类型，下边界是变量parameterizedType5_0_lower，是个空数组。</p>
+<p>第七个参数的测试代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第七个参数，Map&lt;? extends TestReflect,? super TestReflect&gt; p6</span></span><br><span class="line">Type type6=types[<span class="number">6</span>];</span><br><span class="line">Type[] parameterizedType6=((ParameterizedType)type6).getActualTypeArguments();</span><br><span class="line">Type[] parameterizedType6_0_upper=((WildcardType)parameterizedType6[<span class="number">0</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_0_lower=((WildcardType)parameterizedType6[<span class="number">0</span>]).getLowerBounds();</span><br><span class="line">Type[] parameterizedType6_1_upper=((WildcardType)parameterizedType6[<span class="number">1</span>]).getUpperBounds();</span><br><span class="line">Type[] parameterizedType6_1_lower=((WildcardType)parameterizedType6[<span class="number">1</span>]).getLowerBounds();</span><br></pre></td></tr></table></figure></p>
+<p>type6代表Map&lt;? extends TestReflect,? super TestReflect&gt;，用ParameterizedType实现。</p>
+<p>调用getActualTypeArguments()方法后，得到有两个元素的Type数组，两个元素分别代表(? extends TestReflect)和(? super TestReflect)</p>
+<p>把这两个Type元素转成WildcardType后，可以调用getUpperBounds()和getLowerBounds()方法得到上边界和下边界。</p>
+<p>在本例中第一个WildcardType的上边界就是变量parameterizedType6_0_upper，只有一个元素，该元素代表TestReflect类型，下边界是变量parameterizedType6_0_lower，是个空数组。</p>
+<p>在本例中第二个WildcardType的上边界就是变量parameterizedType6_1_upper，只有一个元素，该元素代表Object类型，下边界是变量parameterizedType6_1_lower，只有一个元素，该元素代表TestReflect类型。</p>
+<h2 id="3-5-TypeVariable"><a href="#3-5-TypeVariable" class="headerlink" title="3.5 TypeVariable"></a>3.5 TypeVariable</h2><p>Type的最后一种实现形式是TypeVariable接口，这种实现形式是在泛型类中使用的。</p>
+<p>比如我们定义一个泛型类TestReflect<t>，并在类中定义方法oneMethod(T para)，那么当调用method.getGenericParameterTypes()方法得到的Type数组，数组的元素就是由TypeVariable接口实现的。</t></p>
+<p>真正的实现类是sun.reflect.generics.reflectiveObjects. TypeVariableImpl。</p>
+<p>以上就是关于Type接口的详细介绍。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://blog.shagle.cn/2019/05/27/Java技术之反射Type/" title="Java技术之反射Type" target="_blank" rel="external">http://blog.shagle.cn/2019/05/27/Java技术之反射Type/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="/" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="/" target="_blank"><span class="text-dark">波哥</span><small class="ml-1x">Java Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2019/05/13/导图1/" title="(no title)"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av.js"></script>
+  <script src="//unpkg.com/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: true,
+    notify: false,
+    appId: 'Muwda2bDL8O5i5pKEdIpN23P-gzGzoHsz',
+    appKey: 'P9KEnaQt3ucxmcqtGKHStMHu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
