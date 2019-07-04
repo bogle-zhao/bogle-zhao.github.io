@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.shagle.cn/"/>
-  <updated>2019-07-04T02:48:57.000Z</updated>
+  <updated>2019-07-04T05:32:20.000Z</updated>
   <id>http://blog.shagle.cn/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Java性能调优实战-02-如何制定性能调优策略</title>
+    <title>Java性能调优实战-02 如何制定性能调优策略</title>
     <link href="http://blog.shagle.cn/2019/07/03/Java%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98-02-%E5%A6%82%E4%BD%95%E5%88%B6%E5%AE%9A%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%E7%AD%96%E7%95%A5/"/>
     <id>http://blog.shagle.cn/2019/07/03/Java性能调优实战-02-如何制定性能调优策略/</id>
     <published>2019-07-03T09:56:17.000Z</published>
-    <updated>2019-07-04T02:48:57.000Z</updated>
+    <updated>2019-07-04T05:32:20.000Z</updated>
     
     <content type="html"><![CDATA[<p>调优测试：”测试 - 分析 - 调优”三步走</p><h2 id="1-性能测试攻略"><a href="#1-性能测试攻略" class="headerlink" title="1. 性能测试攻略"></a>1. 性能测试攻略</h2><p>性能测试是提前发现性能瓶颈，保障系统性能稳定的必要措施。使用下面两种常用测试方法</p><ul><li>1.微基准性能测试<ul><li>微基准性能测试可以精准定位到某个模块或者某个方法的性能问题，特别适合做一个功能模块或者一个方法在不同实现方式下的性能对比。例如，对比一个方法使用同步实现和非同步实现的性能。</li></ul></li><li>2.宏基准性能测试<ul><li>宏基准性能测试是一个综合测试，需要考虑到测试环境、测试场景和测试目标。</li></ul></li></ul><h2 id="2-我们在做性能测试时，还要注意一些问题"><a href="#2-我们在做性能测试时，还要注意一些问题" class="headerlink" title="2. 我们在做性能测试时，还要注意一些问题"></a>2. 我们在做性能测试时，还要注意一些问题</h2><ul><li><ol><li>热身问题</li></ol></li><li><ol start="2"><li>性能测试结果不稳定</li></ol></li><li><ol start="3"><li>多 JVM 情况下的影响</li></ol></li></ul><h2 id="3-合理分析结果，制定调优策略"><a href="#3-合理分析结果，制定调优策略" class="headerlink" title="3. 合理分析结果，制定调优策略"></a>3. 合理分析结果，制定调优策略</h2><ul><li>1.优化代码</li><li>2.优化设计</li><li>3.优化算法</li><li>4.时间换空间</li><li>5.空间换时间</li><li>6.参数调优</li></ul><h2 id="4-兜底策略，确保系统稳定性"><a href="#4-兜底策略，确保系统稳定性" class="headerlink" title="4. 兜底策略，确保系统稳定性"></a>4. 兜底策略，确保系统稳定性</h2><p>上边讲到的所有的性能调优策略，都是提高系统性能的手段，但在互联网飞速发展的时代，产品的用户量是瞬息万变的，无论我们的系统优化得有多好，还是会存在承受极限，所以为了保证系统的稳定性，我们还需要采用一些兜底策略。</p><h3 id="1-什么是兜底策略？"><a href="#1-什么是兜底策略？" class="headerlink" title="1.什么是兜底策略？"></a>1.什么是兜底策略？</h3><ul><li>第一，限流，对系统的入口设置最大访问限制</li><li>第二，实现智能化横向扩容。智能化横向扩容可以保证当访问量超过某一个阈值时，系统可以根据需求自动横向新增服务。</li><li>第三，提前扩容。</li></ul><p>目前很多公司使用 Docker  容器来部署应用服务。这是因为 Docker  容器是使用 Kubernetes  作为容器管理系统，而 Kubernetes  可以实现智能化横向扩容和提前扩容 Docker  服务。</p><h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p><img src="f8460bb16b56e8c8897c7cf4c9f99eb8.jpg" alt="总结"></p>]]></content>
     
@@ -41,11 +41,11 @@
   </entry>
   
   <entry>
-    <title>Java性能调优实战</title>
+    <title>Java性能调优实战-01 Java性能调优实战</title>
     <link href="http://blog.shagle.cn/2019/07/03/Java%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%E5%AE%9E%E6%88%98-01-%E5%A6%82%E4%BD%95%E5%88%B6%E5%AE%9A%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%E6%A0%87%E5%87%86/"/>
     <id>http://blog.shagle.cn/2019/07/03/Java性能调优实战-01-如何制定性能调优标准/</id>
     <published>2019-07-03T09:03:05.000Z</published>
-    <updated>2019-07-03T09:48:14.000Z</updated>
+    <updated>2019-07-04T05:32:20.000Z</updated>
     
     <content type="html"><![CDATA[<h2 id="1-为什么要做性能调优？"><a href="#1-为什么要做性能调优？" class="headerlink" title="1. 为什么要做性能调优？"></a>1. 为什么要做性能调优？</h2><p>如果不进行性能调优，那它就好比一颗定时炸弹，随时都会出问题，有些性能问题是时间累积慢慢产生的，到了一定时间自然就爆炸了；而更多的性能问题是由访问量的波动导致的，</p><p>性能调优的目的是想办法提前将问题暴露出来，了解系统所承受的压力、瓶颈。</p><h2 id="2-有哪些参考因素可以体现系统的性能？"><a href="#2-有哪些参考因素可以体现系统的性能？" class="headerlink" title="2. 有哪些参考因素可以体现系统的性能？"></a>2. 有哪些参考因素可以体现系统的性能？</h2><ul><li>CPU</li><li>内存</li><li>磁盘 I/O</li><li>网络</li><li>异常</li><li>数据库</li><li>锁竞争</li></ul><h2 id="3-根据上面参考因素得到的如下系统性能指标"><a href="#3-根据上面参考因素得到的如下系统性能指标" class="headerlink" title="3. 根据上面参考因素得到的如下系统性能指标"></a>3. 根据上面参考因素得到的如下系统性能指标</h2><ul><li>响应时间<ul><li>数据库响应时间</li><li>服务端响应时间</li><li>网络响应时间</li><li>客户端响应时间</li></ul></li><li>吞吐量<ul><li>磁盘吞吐量</li><li>网络吞吐量</li></ul></li><li>计算机资源分配使用率</li><li>负载承受能力</li></ul><h2 id="Q-amp-amp-A"><a href="#Q-amp-amp-A" class="headerlink" title="Q&amp;&amp;A"></a>Q&amp;&amp;A</h2><p><strong>问：QPS&amp;&amp;TPS</strong></p><p>答：QPS(query per second)是单位时间内请求的数量。TPS代表一个事务的处理，可以包含了多次请求。很多公司用QPS作为接口吞吐量的指标，也有很多公司使用TPS作为标准，两者都能表现出系统的吞吐量的大小，TPS的一次事务代表一次用户操作到服务器返回结果，QPS的一次请求代表一个接口的一次请求到服务器返回结果。当一次用户操作只包含一个请求接口时，TPS和QPS没有区别。</p><p><strong>问：不输出JVM 异常堆栈跟踪信息</strong><br>答：可以自己实现自定义异常，继承RuntimeException，然后将writableStackTrace设置为false。<br>以下是RuntimeException的构造函数：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="title">RuntimeException</span><span class="params">(String message, Throwable cause,</span></span></span><br><span class="line"><span class="function"><span class="params">                               <span class="keyword">boolean</span> enableSuppression,</span></span></span><br><span class="line"><span class="function"><span class="params">                               <span class="keyword">boolean</span> writableStackTrace)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(message, cause, enableSuppression, writableStackTrace);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>]]></content>
     
