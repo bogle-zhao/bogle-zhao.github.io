@@ -17,19 +17,19 @@
   <meta http-equiv="window-target" content="_top">
   
   
-  <title>字符串性能优化不容小觑，百M内存轻松存储几十G数据 | 赵波的技术博客</title>
+  <title>Java性能调优实战 02 字符串性能优化不容小觑 | 赵波的技术博客</title>
   <meta name="description" content="String 对象是如何实现的？在 Java 语言中，Sun 公司的工程师们对 String 对象做了大量的优化，来节约内存空间，提升 String 对象在系统中的性能。一起来看看优化过程，如下图所示：  1. 在 Java6 以及之前的版本中，String 对象是对 char 数组进行了封装实现的对象，主要有四个成员变量：char 数组、偏移量 offset、字符数量 count、哈希值 has">
 <meta property="og:type" content="article">
-<meta property="og:title" content="字符串性能优化不容小觑，百M内存轻松存储几十G数据">
+<meta property="og:title" content="Java性能调优实战 02 字符串性能优化不容小觑">
 <meta property="og:url" content="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/index.html">
 <meta property="og:site_name" content="个人博客">
 <meta property="og:description" content="String 对象是如何实现的？在 Java 语言中，Sun 公司的工程师们对 String 对象做了大量的优化，来节约内存空间，提升 String 对象在系统中的性能。一起来看看优化过程，如下图所示：  1. 在 Java6 以及之前的版本中，String 对象是对 char 数组进行了封装实现的对象，主要有四个成员变量：char 数组、偏移量 offset、字符数量 count、哈希值 has">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/357f1cb1263fd0b5b3e4ccb6b971c96d.jpg">
 <meta property="og:image" content="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/b1995253db45cd5e5b7bc1ded7cbdd50.jpg">
-<meta property="og:updated_time" content="2019-07-16T02:20:29.000Z">
+<meta property="og:updated_time" content="2019-07-16T02:22:34.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="字符串性能优化不容小觑，百M内存轻松存储几十G数据">
+<meta name="twitter:title" content="Java性能调优实战 02 字符串性能优化不容小觑">
 <meta name="twitter:description" content="String 对象是如何实现的？在 Java 语言中，Sun 公司的工程师们对 String 对象做了大量的优化，来节约内存空间，提升 String 对象在系统中的性能。一起来看看优化过程，如下图所示：  1. 在 Java6 以及之前的版本中，String 对象是对 char 数组进行了封装实现的对象，主要有四个成员变量：char 数组、偏移量 offset、字符数量 count、哈希值 has">
 <meta name="twitter:image" content="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/357f1cb1263fd0b5b3e4ccb6b971c96d.jpg">
   <!-- Canonical links -->
@@ -267,7 +267,7 @@
                 <a class="category-link" href="/categories/Java性能调优实战/">Java性能调优实战</a>
               </p>
               <p class="item-title">
-                <a href="/2019/07/16/Java性能调优实战-03-String字符串优化/" class="title">字符串性能优化不容小觑，百M内存轻松存储几十G数据</a>
+                <a href="/2019/07/16/Java性能调优实战-03-String字符串优化/" class="title">Java性能调优实战 02 字符串性能优化不容小觑</a>
               </p>
               <p class="item-date">
                 <time datetime="2019-07-16T01:56:14.000Z" itemprop="datePublished">2019-07-16</time>
@@ -355,7 +355,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      字符串性能优化不容小觑，百M内存轻松存储几十G数据
+      Java性能调优实战 02 字符串性能优化不容小觑
     </h1>
   
 
@@ -386,7 +386,7 @@
 
 	<span class="article-read hidden-xs">
     	<i class="icon icon-eye-fill" aria-hidden="true"></i>
-    	<span id="/2019/07/16/Java性能调优实战-03-String字符串优化/" class="leancloud_visitors" data-flag-title="字符串性能优化不容小觑，百M内存轻松存储几十G数据">0</span>
+    	<span id="/2019/07/16/Java性能调优实战-03-String字符串优化/" class="leancloud_visitors" data-flag-title="Java性能调优实战 02 字符串性能优化不容小觑">0</span>
     </span>
 
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/07/16/Java性能调优实战-03-String字符串优化/#comments" class="article-comment-link">评论</a></span>
@@ -465,7 +465,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/" title="字符串性能优化不容小觑，百M内存轻松存储几十G数据" target="_blank" rel="external">http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/</a>
+      <a href="http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/" title="Java性能调优实战 02 字符串性能优化不容小觑" target="_blank" rel="external">http://blog.shagle.cn/2019/07/16/Java性能调优实战-03-String字符串优化/</a>
     </li>
     
     <li class="post-copyright-license">
