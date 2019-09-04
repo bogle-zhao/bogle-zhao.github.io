@@ -25,7 +25,7 @@
 <meta property="og:site_name" content="个人博客">
 <meta property="og:description" content="1. Azkaban网址：https://azkaban.github.io Azkaban是由Linkedin开源的一个批量工作流任务调度器。用于在一个工作流内以一个特定的顺序运行一组工作和流程。Azkaban定义了一种KV文件格式来建立任务之间的依赖关系，并提供一个易于使用的web用户界面维护和跟踪你的工作流。 2. quartz网址：http://www.quartz-scheduler.o">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-09-04T06:34:02.000Z">
+<meta property="og:updated_time" content="2019-09-04T06:38:54.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="job_scheduler">
 <meta name="twitter:description" content="1. Azkaban网址：https://azkaban.github.io Azkaban是由Linkedin开源的一个批量工作流任务调度器。用于在一个工作流内以一个特定的顺序运行一组工作和流程。Azkaban定义了一种KV文件格式来建立任务之间的依赖关系，并提供一个易于使用的web用户界面维护和跟踪你的工作流。 2. quartz网址：http://www.quartz-scheduler.o">
@@ -389,10 +389,10 @@
         <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/09/04/job-scheduler/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 499(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 637(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 2(分)</span>
 	
 
       </div>
@@ -410,6 +410,45 @@
 <p>XXL-JOB是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。</p>
 <h1 id="5-saturn"><a href="#5-saturn" class="headerlink" title="5. saturn"></a>5. saturn</h1><p>网址：<a href="https://github.com/vipshop/Saturn" target="_blank" rel="noopener">https://github.com/vipshop/Saturn</a></p>
 <p>Saturn (任务调度系统)是唯品会Venus体系的一个组成部分，负责分布式的定时任务的调度，取代传统的Linux Cron/Spring Batch Job的方式，做到全域统一配置，统一监控，任务高可用以及分片并发处理。Saturn基于当当Elastic Job代码基础上自主研发的任务调度系统。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">框架实现方式</th>
+<th style="text-align:left">可能的问题</th>
+<th style="text-align:left">优点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">quartz</td>
+<td style="text-align:left">依赖数据库，无中心</td>
+<td style="text-align:left">线上问题，因配置问题引起JOB延时</td>
+</tr>
+<tr>
+<td style="text-align:left">xxl-job</td>
+<td style="text-align:left">需要部署调度中心和数据库</td>
+<td style="text-align:left">若任务数量超过调度中心处理能力，会造成延时</td>
+<td style="text-align:left">文档完善，学习成本低,管理界面完善</td>
+</tr>
+<tr>
+<td style="text-align:left">elasticjob</td>
+<td style="text-align:left">依赖zk</td>
+<td style="text-align:left">若主节点下载，在主节点选出前会暂停调度能力</td>
+<td style="text-align:left">文档完善，依赖zk无中心</td>
+</tr>
+<tr>
+<td style="text-align:left">Saturn</td>
+<td style="text-align:left">依赖zk</td>
+<td style="text-align:left">同elasticjob    文档完善，管理界面完善</td>
+</tr>
+<tr>
+<td style="text-align:left">azkaban</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+</tbody>
+</table>
 
       
     </div>
