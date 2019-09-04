@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.shagle.cn/"/>
-  <updated>2019-09-03T11:33:18.000Z</updated>
+  <updated>2019-09-04T06:34:02.000Z</updated>
   <id>http://blog.shagle.cn/</id>
   
   <author>
@@ -17,20 +17,42 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Java8 Lambda</title>
-    <link href="http://blog.shagle.cn/2019/08/01/Java8Lambda/"/>
-    <id>http://blog.shagle.cn/2019/08/01/Java8Lambda/</id>
-    <published>2019-08-01T14:06:12.000Z</published>
-    <updated>2019-09-03T11:33:18.000Z</updated>
+    <title>job_scheduler</title>
+    <link href="http://blog.shagle.cn/2019/09/04/job-scheduler/"/>
+    <id>http://blog.shagle.cn/2019/09/04/job-scheduler/</id>
+    <published>2019-09-04T06:23:21.000Z</published>
+    <updated>2019-09-04T06:34:02.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="什么是Lambda"><a href="#什么是Lambda" class="headerlink" title="什么是Lambda"></a>什么是Lambda</h1><p>在编程语言中，Lambda指是一种运算符，被用于指定匿名函数或者是闭包。</p><h1 id="为什么要使用Lambda"><a href="#为什么要使用Lambda" class="headerlink" title="为什么要使用Lambda"></a>为什么要使用Lambda</h1><ul><li>1.在Java中，我们无法将一个函数作为参数传递给方法，也无法声明返回一个函数</li><li>2.在JavaScript中，函数参数是一个函数，返回值是另一个函数的情况非常常见，JavaScript是一门典型的函数式语言  </li></ul><h1 id="FunctionalInterface介绍"><a href="#FunctionalInterface介绍" class="headerlink" title="@FunctionalInterface介绍"></a>@FunctionalInterface介绍</h1><p>在一个类上声明了@FunctionalInterface类的接口，称之为函数式接口，从概念上来看，一个函数式接口只有一个抽象方法，函数式接口实例可以通过lambda，方法引用或者是构造方法来创建，<br>特点：<br>1、唯一的抽象方法，有且仅有一个<br>2、可用于lamba类型的使用方式<br>3、不能被覆盖之后，再声明为抽象方法，则不算抽象方法。例如接口实现了Object中的方法。<br>4、加上标注,则会触发JavaCompiler的检查。对于符合函数接口的接口，加不加都无关紧要，但是加上则会提供一层编译检查的保障。如果不符合，则会报错。</p><p>关于函数式接口：<br>1、如果一个接口只有一个抽象方法，那么该接口就是函数式接口<br>2、如果我们在某个接口上声明了FunctionalInterface注解，那么变压器就会按照函数式接口来要求自己<br>3、如果一个接口只有一个抽象方法，但是接口并没有声明FunctionalInterface注解，编译器也会对于满足函数式接口规范的接口当做函数式接口来看待。</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="1-Azkaban"><a href="#1-Azkaban" class="headerlink" title="1. Azkaban"></a>1. Azkaban</h1><p>网址：<a href="https://azkaban.github.io" target="_blank" rel="noopener">https://azkaban.github.io</a></p><p><code>Azkaban</code>是由Linkedin开源的一个批量工作流任务调度器。用于在一个工作流内以一个特定的顺序运行一组工作和流程。<code>Azkaban</code>定义了一种KV文件格式来建立任务之间的依赖关系，并提供一个易于使用的web用户界面维护和跟踪你的工作流。</p><h1 id="2-quartz"><a href="#2-quartz" class="headerlink" title="2. quartz"></a>2. quartz</h1><p>网址：<a href="http://www.quartz-scheduler.org" target="_blank" rel="noopener">http://www.quartz-scheduler.org</a></p><p>Quartz是OpenSymphony开源组织在Job scheduling领域又一个开源项目。Quartz 是一个完全由 Java 编写的开源作业调度框架，为在 Java 应用程序中进行作业调度提供了简单却强大的机制。</p><h1 id="3-Elastic-job"><a href="#3-Elastic-job" class="headerlink" title="3. Elastic-job"></a>3. Elastic-job</h1><p>网址：<a href="http://elasticjob.io" target="_blank" rel="noopener">http://elasticjob.io</a></p><p>elastic-job 是由当当网基于quartz 二次开发之后的分布式调度解决方案 ， 由两个相对独立的子项目Elastic-Job-Lite和Elastic-Job-Cloud组成 。</p><p>elastic-job主要的设计理念是无中心化的分布式定时调度框架，思路来源于Quartz的基于数据库的高可用方案。但数据库没有分布式协调功能，所以在高可用方案的基础上增加了弹性扩容和数据分片的思路，以便于更大限度的利用分布式服务器的资源。</p><h1 id="4-XXL-JOB"><a href="#4-XXL-JOB" class="headerlink" title="4. XXL-JOB"></a>4. XXL-JOB</h1><p>网址：<a href="https://github.com/xuxueli/xxl-job" target="_blank" rel="noopener">https://github.com/xuxueli/xxl-job</a></p><p>XXL-JOB是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。</p><h1 id="5-saturn"><a href="#5-saturn" class="headerlink" title="5. saturn"></a>5. saturn</h1><p>网址：<a href="https://github.com/vipshop/Saturn" target="_blank" rel="noopener">https://github.com/vipshop/Saturn</a></p><p>Saturn (任务调度系统)是唯品会Venus体系的一个组成部分，负责分布式的定时任务的调度，取代传统的Linux Cron/Spring Batch Job的方式，做到全域统一配置，统一监控，任务高可用以及分片并发处理。Saturn基于当当Elastic Job代码基础上自主研发的任务调度系统。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;h1 id=&quot;什么是Lambda&quot;&gt;&lt;a href=&quot;#什么是Lambda&quot; class=&quot;headerlink&quot; title=&quot;什么是Lambda&quot;&gt;&lt;/a&gt;什么是Lambda&lt;/h1&gt;&lt;p&gt;在编程语言中，Lambda指是一种运算符，被用于指定匿名函数或者是闭包。&lt;/p&gt;
-&lt;
+        &lt;h1 id=&quot;1-Azkaban&quot;&gt;&lt;a href=&quot;#1-Azkaban&quot; class=&quot;headerlink&quot; title=&quot;1. Azkaban&quot;&gt;&lt;/a&gt;1. Azkaban&lt;/h1&gt;&lt;p&gt;网址：&lt;a href=&quot;https://azkaban.github.io&quot; t
+      
+    
+    </summary>
+    
+      <category term="scheduler" scheme="http://blog.shagle.cn/categories/scheduler/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Java8 Lambda</title>
+    <link href="http://blog.shagle.cn/2019/08/01/Java8Lambda/"/>
+    <id>http://blog.shagle.cn/2019/08/01/Java8Lambda/</id>
+    <published>2019-08-01T14:06:12.000Z</published>
+    <updated>2019-09-03T15:31:56.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Lambda"><a href="#Lambda" class="headerlink" title="Lambda"></a>Lambda</h1><h2 id="什么是Lambda"><a href="#什么是Lambda" class="headerlink" title="什么是Lambda"></a>什么是Lambda</h2><p>在编程语言中，Lambda指是一种运算符，被用于指定匿名函数或者是闭包。</p><h2 id="为什么要使用Lambda"><a href="#为什么要使用Lambda" class="headerlink" title="为什么要使用Lambda"></a>为什么要使用Lambda</h2><ul><li>1.在Java中，我们无法将一个函数作为参数传递给方法，也无法声明返回一个函数</li><li>2.在JavaScript中，函数参数是一个函数，返回值是另一个函数的情况非常常见，JavaScript是一门典型的函数式语言  </li></ul><h2 id="Lambda作用"><a href="#Lambda作用" class="headerlink" title="Lambda作用"></a>Lambda作用</h2><p>传递行为，不仅仅是值</p><h1 id="FunctionalInterface介绍"><a href="#FunctionalInterface介绍" class="headerlink" title="@FunctionalInterface介绍"></a>@FunctionalInterface介绍</h1><p>在一个类上声明了@FunctionalInterface类的接口，称之为函数式接口，从概念上来看，一个函数式接口只有一个抽象方法，函数式接口实例可以通过lambda，方法引用或者是构造方法来创建，<br>特点：<br>1、唯一的抽象方法，有且仅有一个<br>2、可用于lamba类型的使用方式<br>3、不能被覆盖之后，再声明为抽象方法，则不算抽象方法。例如接口实现了Object中的方法。<br>4、加上标注,则会触发JavaCompiler的检查。对于符合函数接口的接口，加不加都无关紧要，但是加上则会提供一层编译检查的保障。如果不符合，则会报错。</p><p>关于函数式接口：<br>1、如果一个接口只有一个抽象方法，那么该接口就是函数式接口<br>2、如果我们在某个接口上声明了FunctionalInterface注解，那么变压器就会按照函数式接口来要求自己<br>3、如果一个接口只有一个抽象方法，但是接口并没有声明FunctionalInterface注解，编译器也会对于满足函数式接口规范的接口当做函数式接口来看待。</p><h1 id="java-util-function-Function-lt-T-R-gt"><a href="#java-util-function-Function-lt-T-R-gt" class="headerlink" title="java.util.function.Function&lt;T,R&gt;"></a>java.util.function.Function&lt;T,R&gt;</h1><p>接收一个参数，并生成一个结果,T:方法参数，R：方法结果返回值类型<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//谁使用该function，那么就是谁调用toUpperCase()方法</span></span><br><span class="line"><span class="comment">//实例1</span></span><br><span class="line">Function&lt;String,String&gt; function = String.toUpperCase;</span><br><span class="line"><span class="comment">//实例2,排序：倒序</span></span><br><span class="line">Collections.sort(list,Comparator.reverseOrder());</span><br></pre></td></tr></table></figure></p><h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>如果一个函数接收一个函数作为参数，返回值为一个函数，那么该函数叫高阶函数</p><h1 id="java-util-function-Consumer"><a href="#java-util-function-Consumer" class="headerlink" title="java.util.function.Consumer"></a>java.util.function.Consumer</h1><p>表示一个动作，接收一个唯一的值，并不返回任何值，但是有个副作用：在方法里面可能会修改参数值（顾名思义：消费者）</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;Lambda&quot;&gt;&lt;a href=&quot;#Lambda&quot; class=&quot;headerlink&quot; title=&quot;Lambda&quot;&gt;&lt;/a&gt;Lambda&lt;/h1&gt;&lt;h2 id=&quot;什么是Lambda&quot;&gt;&lt;a href=&quot;#什么是Lambda&quot; class=&quot;headerlink
       
     
     </summary>
@@ -486,32 +508,6 @@
     
     
       <category term="SkipList跳表" scheme="http://blog.shagle.cn/tags/SkipList%E8%B7%B3%E8%A1%A8/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>redis设计与实现</title>
-    <link href="http://blog.shagle.cn/2019/03/04/redis%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/"/>
-    <id>http://blog.shagle.cn/2019/03/04/redis设计与实现/</id>
-    <published>2019-03-04T06:45:49.000Z</published>
-    <updated>2019-03-08T05:23:54.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>Redis数据库里面的每个键值对（key-value pair）都是由对象（object）组成的，其中：</p><ul><li>数据库键总是一个字符串对象（string object）；</li><li>而数据库键的值则可以是字符串对象、列表对象（list object）、哈希对象（hash object）、集合对象（set object）、有序集合对象（sorted set object）这五种对象中的其中一种。</li></ul><h1 id="2-字符串"><a href="#2-字符串" class="headerlink" title="2. 字符串"></a>2. <a href="Redis之字符串.md">字符串</a></h1><h1 id="3-链表"><a href="#3-链表" class="headerlink" title="3. 链表"></a>3. <a href="Redis之链表.md">链表</a></h1><h1 id="4-字典"><a href="#4-字典" class="headerlink" title="4. 字典"></a>4. 字典</h1><h1 id="5-跳跃表"><a href="#5-跳跃表" class="headerlink" title="5. 跳跃表"></a>5. <a href="算法之SkipList跳表.md">跳跃表</a></h1><h1 id="6-整数集合"><a href="#6-整数集合" class="headerlink" title="6. 整数集合"></a>6. 整数集合</h1><h1 id="7-压缩列表"><a href="#7-压缩列表" class="headerlink" title="7. 压缩列表"></a>7. <a href="压缩列表zipList.md">压缩列表</a></h1><p>压缩列表参考：<a href="https://blog.csdn.net/u012658346/article/details/51321337" target="_blank" rel="noopener">https://blog.csdn.net/u012658346/article/details/51321337</a></p><h1 id="8-对象"><a href="#8-对象" class="headerlink" title="8. 对象"></a>8. <a href="Redis之对象.md">对象</a></h1>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h1 id=&quot;1-简介&quot;&gt;&lt;a href=&quot;#1-简介&quot; class=&quot;headerlink&quot; title=&quot;1. 简介&quot;&gt;&lt;/a&gt;1. 简介&lt;/h1&gt;&lt;p&gt;Redis数据库里面的每个键值对（key-value pair）都是由对象（object）组成的，其中：&lt;/p&gt;
-&lt;ul
-      
-    
-    </summary>
-    
-      <category term="NoSql" scheme="http://blog.shagle.cn/categories/NoSql/"/>
-    
-    
-      <category term="redis" scheme="http://blog.shagle.cn/tags/redis/"/>
     
   </entry>
   
