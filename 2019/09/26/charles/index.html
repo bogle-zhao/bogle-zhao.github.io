@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>charles | 赵波的技术博客</title>
+  <meta name="description" content="charles使用大全我们在开发网站项目的时候，我们可以通过浏览器的debug模式来看request以及response的数据，那么如果我们开发移动端项目没有网页呢？如何抓取数据呢？ 前几天有个做服务端的师弟跟我说他不用抓包工具，遇到问题直接debug代码，那我问他，如果线上服务的话，你怎么调？在实际项目中，没有遇到跟客户端相互扯皮的事情吗？我觉得很正常啊，客户端说他没问题，服务端也说他没问题，到">
+<meta name="keywords" content="charles">
+<meta property="og:type" content="article">
+<meta property="og:title" content="charles">
+<meta property="og:url" content="http://blog.shagle.cn/2019/09/26/charles/index.html">
+<meta property="og:site_name" content="个人博客">
+<meta property="og:description" content="charles使用大全我们在开发网站项目的时候，我们可以通过浏览器的debug模式来看request以及response的数据，那么如果我们开发移动端项目没有网页呢？如何抓取数据呢？ 前几天有个做服务端的师弟跟我说他不用抓包工具，遇到问题直接debug代码，那我问他，如果线上服务的话，你怎么调？在实际项目中，没有遇到跟客户端相互扯皮的事情吗？我觉得很正常啊，客户端说他没问题，服务端也说他没问题，到">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/20190926110841.jpg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-0af79e9221fcd7ab.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-3cdbf83bf3b4de25.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-c900ffa8c80eff3b.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-a1fb99097ae01f0b.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-9750450dc0e8fc28.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-c225426989fd8940.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-a483998d9f2ad243.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-868d29d2ca72f58f.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-c737b281ba531794.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-501f5b740103ff63.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-65d7822ad87d7999.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-ce5bad55f555b6c5.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-aea3ac70e781e5db.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-ab923c98d9d4e42f.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-836ea6a168f45e35.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-d26e2b6b4d01efd7.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-b09592f4a3dea32d.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-a5b605dcd0f197f2.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-dd452e9dd2626781.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-8035cd2b1d4571b8.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-8c54f2bd53b3dc3d.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-12fb20e4bd437eb5.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-685e062e709c52a7.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-c4c8741157b01bc4.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-eef693a2d540e4c8.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-fac0b0cded42b5e4.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-e5ca0b0d6adf3eb6.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-07d03bc720a6f07c.jpeg">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-ed49ee811f56cb4d.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-83ca4d92b802fa20.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-ccef60995473527a.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-9073122482819867.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-12f83c1215cf5726.png">
+<meta property="og:image" content="http://blog.shagle.cn/2019/09/26/charles/9481801-c22b2e1b4ad1a938.png">
+<meta property="og:updated_time" content="2019-09-26T03:30:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="charles">
+<meta name="twitter:description" content="charles使用大全我们在开发网站项目的时候，我们可以通过浏览器的debug模式来看request以及response的数据，那么如果我们开发移动端项目没有网页呢？如何抓取数据呢？ 前几天有个做服务端的师弟跟我说他不用抓包工具，遇到问题直接debug代码，那我问他，如果线上服务的话，你怎么调？在实际项目中，没有遇到跟客户端相互扯皮的事情吗？我觉得很正常啊，客户端说他没问题，服务端也说他没问题，到">
+<meta name="twitter:image" content="http://blog.shagle.cn/2019/09/26/charles/20190926110841.jpg">
+  <!-- Canonical links -->
+  <link rel="canonical" href="http://blog.shagle.cn/2019/09/26/charles/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="个人博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+</head>
+
+
+<body class="main-center theme-purple" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="/" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">波哥</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Java Developer &amp; Designer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> ChengDu, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索">
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech="">
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope="" itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav ">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about">
+            
+            <i class="icon icon-cup-fill"></i>
+            
+            <span class="menu-title">关于</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope="" itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/HttpClient/">HttpClient</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/I-O/">I/O</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java8/">Java8</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java中String、StringBuffer、StringBuilder的区别/">Java中String、StringBuffer、StringBuilder的区别</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java并发/">Java并发</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java性能调优实战/">Java性能调优实战</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/">Java技术</a><span class="category-list-count">26</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Java技术/多线程/">多线程</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/MQ/">MQ</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NoSql/">NoSql</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RPC/">RPC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring/">Spring</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring-MVC/">Spring MVC</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/">Spring源码深度解析</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Spring源码深度解析/Spring/">Spring</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/ThreadLocalRandom/">ThreadLocalRandom</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ribbon/">ribbon</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/rpc/">rpc</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/scheduler/">scheduler</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/security/">security</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet/">servlet</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/">servlet3.0</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/servlet3-0/spring-mvc/">spring mvc</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/spring/">spring</a><span class="category-list-count">32</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代码热部署/">代码热部署</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/Zookeeper/">Zookeeper</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具/">工具</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程术语/">编程术语</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/设计模式/">设计模式</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AES/">AES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AOP/">AOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/AQS/">AQS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ApplicationEvent/">ApplicationEvent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ArrayList/">ArrayList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BOP/">BOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Bean/">Bean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanDefinitionReader/">BeanDefinitionReader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanFactoryPostProcessor/">BeanFactoryPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/BeanPostProcessor/">BeanPostProcessor</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Callable/">Callable</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ComponentScan/">ComponentScan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Conditional/">Conditional</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DES/">DES</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/DI-DL/">DI/DL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FactoryBean/">FactoryBean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Future/">Future</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FutureTask/">FutureTask</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hash/">Hash</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HotCode2/">HotCode2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/HttpURLConnection/">HttpURLConnection</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/I-O多路复用/">I/O多路复用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IOC/">IOC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/InputStream/">InputStream</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Java/">Java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LRU/">LRU</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Lambda/">Lambda</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Lazy-bean注解/">Lazy-bean注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LinkedList/">LinkedList</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LockSupport/">LockSupport</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5withRSA/">MD5withRSA</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MD5加密/">MD5加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-1/">O(1)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-log-n/">O(log n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/O-n/">O(n)</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OOP/">OOP</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertyPlaceholderConfigurer/">PropertyPlaceholderConfigurer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PropertySource，Environment，Profile/">PropertySource，Environment，Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Protocol-buffers/">Protocol buffers</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantLock/">ReentrantLock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReentrantReadWriteLock/">ReentrantReadWriteLock</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource/">Resource</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceBundle/">ResourceBundle</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ResourceLoader/">ResourceLoader</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Resource接口/">Resource接口</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Semaphore/">Semaphore</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sentinel/">Sentinel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Sharding-jdbc/">Sharding-jdbc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ShardingSphere/">ShardingSphere</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SkipList跳表/">SkipList跳表</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/">Spring</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-事件机制/">Spring 事件机制</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/System-arrayCopy/">System.arrayCopy</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ThreadLocal/">ThreadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Zookeeper/">Zookeeper</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/annotation/">annotation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/aop/">aop</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/available/">available</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/charles/">charles</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cpu/">cpu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/feign/">feign</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/getEnv/">getEnv</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git多个账号配置/">git多个账号配置</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/grpc/">grpc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/idea/">idea</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ignoreDependencyInterface/">ignoreDependencyInterface</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupt/">interrupt</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/interrupted/">interrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/isInterrupted/">isInterrupted</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java8/">java8</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javabean/">javabean</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/join/">join</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jvm/">jvm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pojo/">pojo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ribbon/">ribbon</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/servlet3-0/">servlet3.0</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sha1加密/">sha1加密</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spirng-Profile/">spirng Profile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring/">spring</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Autowired/">spring Autowired</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Aware/">spring Aware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Configuration注解/">spring Configuration注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Import注解/">spring Import注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Primary/">spring Primary</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource原理/">spring PropertySource原理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-PropertySource注解/">spring PropertySource注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Qualifier/">spring Qualifier</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-Scope注解/">spring Scope注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-mvc/">spring mvc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-value注解/">spring value注解</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-导图/">spring 导图</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spring-生命周期/">spring-生命周期</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/threadLocal/">threadLocal</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/type/">type</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/volatile/">volatile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/位运算/">位运算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/公钥和私钥/">公钥和私钥</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分布式锁/">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/占位符解析器/">占位符解析器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/国际化/">国际化</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/异步controller/">异步controller</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/强引用、软引用、弱引用、虚引用/">强引用、软引用、弱引用、虚引用</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/熔断/">熔断</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程池/">线程池</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/线程通信/">线程通信</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式/">设计模式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/设计模式六大原则/">设计模式六大原则</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/进制转换/">进制转换</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AES/" style="font-size: 13px;">AES</a> <a href="/tags/AOP/" style="font-size: 13px;">AOP</a> <a href="/tags/AQS/" style="font-size: 13px;">AQS</a> <a href="/tags/ApplicationEvent/" style="font-size: 13px;">ApplicationEvent</a> <a href="/tags/ArrayList/" style="font-size: 13px;">ArrayList</a> <a href="/tags/BOP/" style="font-size: 13px;">BOP</a> <a href="/tags/Bean/" style="font-size: 13px;">Bean</a> <a href="/tags/BeanDefinitionReader/" style="font-size: 13px;">BeanDefinitionReader</a> <a href="/tags/BeanFactoryPostProcessor/" style="font-size: 13px;">BeanFactoryPostProcessor</a> <a href="/tags/BeanPostProcessor/" style="font-size: 13px;">BeanPostProcessor</a> <a href="/tags/Callable/" style="font-size: 13px;">Callable</a> <a href="/tags/ComponentScan/" style="font-size: 13px;">ComponentScan</a> <a href="/tags/Conditional/" style="font-size: 13px;">Conditional</a> <a href="/tags/DES/" style="font-size: 13px;">DES</a> <a href="/tags/DI-DL/" style="font-size: 13px;">DI/DL</a> <a href="/tags/FactoryBean/" style="font-size: 13px;">FactoryBean</a> <a href="/tags/Future/" style="font-size: 13px;">Future</a> <a href="/tags/FutureTask/" style="font-size: 13.25px;">FutureTask</a> <a href="/tags/Hash/" style="font-size: 13.25px;">Hash</a> <a href="/tags/HotCode2/" style="font-size: 13px;">HotCode2</a> <a href="/tags/HttpURLConnection/" style="font-size: 13px;">HttpURLConnection</a> <a href="/tags/I-O多路复用/" style="font-size: 13px;">I/O多路复用</a> <a href="/tags/IOC/" style="font-size: 13.25px;">IOC</a> <a href="/tags/InputStream/" style="font-size: 13px;">InputStream</a> <a href="/tags/Java/" style="font-size: 13.5px;">Java</a> <a href="/tags/LRU/" style="font-size: 13px;">LRU</a> <a href="/tags/Lambda/" style="font-size: 13px;">Lambda</a> <a href="/tags/Lazy-bean注解/" style="font-size: 13px;">Lazy-bean注解</a> <a href="/tags/LinkedList/" style="font-size: 13px;">LinkedList</a> <a href="/tags/LockSupport/" style="font-size: 13px;">LockSupport</a> <a href="/tags/MD5withRSA/" style="font-size: 13px;">MD5withRSA</a> <a href="/tags/MD5加密/" style="font-size: 13px;">MD5加密</a> <a href="/tags/O-1/" style="font-size: 13px;">O(1)</a> <a href="/tags/O-log-n/" style="font-size: 13px;">O(log n)</a> <a href="/tags/O-n/" style="font-size: 13px;">O(n)</a> <a href="/tags/OOP/" style="font-size: 13px;">OOP</a> <a href="/tags/PropertyPlaceholderConfigurer/" style="font-size: 13px;">PropertyPlaceholderConfigurer</a> <a href="/tags/PropertySource，Environment，Profile/" style="font-size: 13px;">PropertySource，Environment，Profile</a> <a href="/tags/Protocol-buffers/" style="font-size: 13px;">Protocol buffers</a> <a href="/tags/ReentrantLock/" style="font-size: 13px;">ReentrantLock</a> <a href="/tags/ReentrantReadWriteLock/" style="font-size: 13.25px;">ReentrantReadWriteLock</a> <a href="/tags/Resource/" style="font-size: 13px;">Resource</a> <a href="/tags/ResourceBundle/" style="font-size: 13px;">ResourceBundle</a> <a href="/tags/ResourceLoader/" style="font-size: 13px;">ResourceLoader</a> <a href="/tags/Resource接口/" style="font-size: 13px;">Resource接口</a> <a href="/tags/Semaphore/" style="font-size: 13px;">Semaphore</a> <a href="/tags/Sentinel/" style="font-size: 13px;">Sentinel</a> <a href="/tags/Sharding-jdbc/" style="font-size: 13px;">Sharding-jdbc</a> <a href="/tags/ShardingSphere/" style="font-size: 13px;">ShardingSphere</a> <a href="/tags/SkipList跳表/" style="font-size: 13px;">SkipList跳表</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/Spring-事件机制/" style="font-size: 13px;">Spring 事件机制</a> <a href="/tags/System-arrayCopy/" style="font-size: 13px;">System.arrayCopy</a> <a href="/tags/ThreadLocal/" style="font-size: 13px;">ThreadLocal</a> <a href="/tags/Zookeeper/" style="font-size: 13px;">Zookeeper</a> <a href="/tags/annotation/" style="font-size: 13px;">annotation</a> <a href="/tags/aop/" style="font-size: 13px;">aop</a> <a href="/tags/available/" style="font-size: 13px;">available</a> <a href="/tags/charles/" style="font-size: 13px;">charles</a> <a href="/tags/cpu/" style="font-size: 13px;">cpu</a> <a href="/tags/feign/" style="font-size: 13.25px;">feign</a> <a href="/tags/getEnv/" style="font-size: 13px;">getEnv</a> <a href="/tags/git多个账号配置/" style="font-size: 13px;">git多个账号配置</a> <a href="/tags/grpc/" style="font-size: 13px;">grpc</a> <a href="/tags/idea/" style="font-size: 13px;">idea</a> <a href="/tags/ignoreDependencyInterface/" style="font-size: 13px;">ignoreDependencyInterface</a> <a href="/tags/interrupt/" style="font-size: 13px;">interrupt</a> <a href="/tags/interrupted/" style="font-size: 13px;">interrupted</a> <a href="/tags/isInterrupted/" style="font-size: 13px;">isInterrupted</a> <a href="/tags/java8/" style="font-size: 13px;">java8</a> <a href="/tags/javabean/" style="font-size: 13px;">javabean</a> <a href="/tags/join/" style="font-size: 13px;">join</a> <a href="/tags/jvm/" style="font-size: 13px;">jvm</a> <a href="/tags/kafka/" style="font-size: 13px;">kafka</a> <a href="/tags/pojo/" style="font-size: 13px;">pojo</a> <a href="/tags/redis/" style="font-size: 13.75px;">redis</a> <a href="/tags/ribbon/" style="font-size: 13.25px;">ribbon</a> <a href="/tags/servlet3-0/" style="font-size: 13.25px;">servlet3.0</a> <a href="/tags/sha1加密/" style="font-size: 13px;">sha1加密</a> <a href="/tags/spirng-Profile/" style="font-size: 13px;">spirng Profile</a> <a href="/tags/spring/" style="font-size: 13.25px;">spring</a> <a href="/tags/spring-Autowired/" style="font-size: 13px;">spring Autowired</a> <a href="/tags/spring-Aware/" style="font-size: 13px;">spring Aware</a> <a href="/tags/spring-Configuration注解/" style="font-size: 13px;">spring Configuration注解</a> <a href="/tags/spring-Import注解/" style="font-size: 13px;">spring Import注解</a> <a href="/tags/spring-Primary/" style="font-size: 13px;">spring Primary</a> <a href="/tags/spring-PropertySource原理/" style="font-size: 13px;">spring PropertySource原理</a> <a href="/tags/spring-PropertySource注解/" style="font-size: 13px;">spring PropertySource注解</a> <a href="/tags/spring-Qualifier/" style="font-size: 13px;">spring Qualifier</a> <a href="/tags/spring-Scope注解/" style="font-size: 13px;">spring Scope注解</a> <a href="/tags/spring-mvc/" style="font-size: 13px;">spring mvc</a> <a href="/tags/spring-value注解/" style="font-size: 13px;">spring value注解</a> <a href="/tags/spring-导图/" style="font-size: 13px;">spring 导图</a> <a href="/tags/spring-生命周期/" style="font-size: 13px;">spring-生命周期</a> <a href="/tags/threadLocal/" style="font-size: 13px;">threadLocal</a> <a href="/tags/type/" style="font-size: 13px;">type</a> <a href="/tags/volatile/" style="font-size: 13px;">volatile</a> <a href="/tags/位运算/" style="font-size: 13px;">位运算</a> <a href="/tags/公钥和私钥/" style="font-size: 13px;">公钥和私钥</a> <a href="/tags/分布式锁/" style="font-size: 13px;">分布式锁</a> <a href="/tags/占位符解析器/" style="font-size: 13px;">占位符解析器</a> <a href="/tags/国际化/" style="font-size: 13.25px;">国际化</a> <a href="/tags/异步controller/" style="font-size: 13px;">异步controller</a> <a href="/tags/强引用、软引用、弱引用、虚引用/" style="font-size: 13px;">强引用、软引用、弱引用、虚引用</a> <a href="/tags/熔断/" style="font-size: 13px;">熔断</a> <a href="/tags/线程池/" style="font-size: 13px;">线程池</a> <a href="/tags/线程通信/" style="font-size: 13px;">线程通信</a> <a href="/tags/设计模式/" style="font-size: 13px;">设计模式</a> <a href="/tags/设计模式六大原则/" style="font-size: 13px;">设计模式六大原则</a> <a href="/tags/进制转换/" style="font-size: 13px;">进制转换</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">33</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/工具/">工具</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/09/26/charles/" class="title">charles</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-09-26T03:07:24.000Z" itemprop="datePublished">2019-09-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/scheduler/">scheduler</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/09/04/job-scheduler/" class="title">job_scheduler</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-09-04T06:23:21.000Z" itemprop="datePublished">2019-09-04</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java8/">Java8</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/08/01/Java8Lambda/" class="title">Java8 Lambda</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-08-01T14:06:12.000Z" itemprop="datePublished">2019-08-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java性能调优实战/">Java性能调优实战</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/07/16/Java性能调优实战-04-慎重使用正则表达式/" class="title">Java性能调优实战 04 慎重使用正则表达式</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-07-16T03:13:19.000Z" itemprop="datePublished">2019-07-16</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/Java性能调优实战/">Java性能调优实战</a>
+              </p>
+              <p class="item-title">
+                <a href="/2019/07/16/Java性能调优实战-03-String字符串优化/" class="title">Java性能调优实战 02 字符串性能优化不容小觑</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-07-16T01:56:14.000Z" itemprop="datePublished">2019-07-16</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<main class="main" role="main">
+  <div class="content">
+  <article id="main-center-charles" class="article article-type-main-center" itemscope="" itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      charles
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/09/26/charles/" class="article-date">
+	  <time datetime="2019-09-26T03:07:24.000Z" itemprop="datePublished">2019-09-26</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/工具/">工具</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/charles/">charles</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+	<span class="article-read hidden-xs">
+    	<i class="icon icon-eye-fill" aria-hidden="true"></i>
+    	<span id="/2019/09/26/charles/" class="leancloud_visitors" data-flag-title="charles">0</span>
+    </span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/09/26/charles/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 10(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h1 id="charles使用大全"><a href="#charles使用大全" class="headerlink" title="charles使用大全"></a>charles使用大全</h1><p>我们在开发网站项目的时候，我们可以通过浏览器的debug模式来看request以及response的数据，那么如果我们开发移动端项目没有网页呢？如何抓取数据呢？</p>
+<p>前几天有个做服务端的师弟跟我说他不用抓包工具，遇到问题直接debug代码，那我问他，如果线上服务的话，你怎么调？在实际项目中，没有遇到跟客户端相互扯皮的事情吗？我觉得很正常啊，客户端说他没问题，服务端也说他没问题，到底谁有问题？这时候没必要相互推脱，拿数据出来说话才是王道。抓包工具做了什么？它把客户端的请求数据，以及服务端返回的数据完完整整的抓取下来，供攻城狮分析问题。所以首先分析问题才是最重要的，而不是一上来就跟踪代码debug。</p>
+<p><img src="20190926110841.jpg" alt="charles"></p>
+<h2 id="Charles"><a href="#Charles" class="headerlink" title="Charles"></a>Charles</h2><p>是一个HTTP代理服务器,HTTP监视器,反转代理服务器，当程序连接Charles的代理访问互联网时，Charles可以监控这个程序发送和接收的所有数据。它允许一个开发者查看所有连接互联网的HTTP通信，这些包括request,</p>
+<p>response和HTTP headers （包含cookies与caching信息）。</p>
+<h2 id="Charles主要功能"><a href="#Charles主要功能" class="headerlink" title="Charles主要功能:"></a>Charles主要功能:</h2><ol>
+<li><p>支持SSL代理。可以截取分析SSL的请求。</p>
+</li>
+<li><p>支持流量控制。可以模拟慢速网络以及等待时间（latency）较长的请求。</p>
+</li>
+<li><p>支持AJAX调试。可以自动将json或xml数据格式化，方便查看。</p>
+</li>
+<li><p>支持AMF调试。可以将Flash Remoting 或 Flex Remoting信息格式化，方便查看。</p>
+</li>
+<li><p>支持重发网络请求，方便后端调试。</p>
+</li>
+<li><p>支持修改网络请求参数。</p>
+</li>
+<li><p>支持网络请求的截获并动态修改。</p>
+</li>
+<li><p>检查HTML，CSS和RSS内容是否符合W3C标准。</p>
+</li>
+</ol>
+<h2 id="Charles安装："><a href="#Charles安装：" class="headerlink" title="Charles安装："></a>Charles安装：</h2><p>去Charles的官方网站（<a href="http://www.charlesproxy.com）下载最新版的相应操作系统的Charles安装包安装即可。" target="_blank" rel="noopener">http://www.charlesproxy.com）下载最新版的相应操作系统的Charles安装包安装即可。</a></p>
+<p>Charles是收费软件，可以免费试用30天。试用期过后，未付费的用户仍然可以继续使用，但是每次使用时间不能超过30分钟，并且启动时将会有10秒种的延时。</p>
+<p>因此，该付费方案对广大用户还是相当友好的，即使你长期不付费，也能使用完整的软件功能。只是当你需要长时间进行封包调试时，会因为Charles强制关闭而遇到影响。（偷偷告诉你，公众号回复“Charles”获取破解版下载链接）</p>
+<p><strong>Charles的功能很强大，我们这里只介绍几个常用的并且非常实用的功能：</strong></p>
+<ol>
+<li>将Charles设置成系统代理<ol start="2">
+<li>截取移动设备上的网络请求包<br> 2.1手动重复请求（Repeat，Advanced  Repeat）<br> 2.2手动模拟请求（Compose）<br> 2.3修改网络请求内容（Compose）</li>
+<li>过滤网络请求</li>
+<li>代理转发</li>
+<li>支持https请求抓包（如果配置了还是抓不到，下面有解决方案）</li>
+</ol>
+</li>
+</ol>
+<p>Charles 主要提供两种查看封包的视图，分别名为 “<code>Structure</code>” 和 “<code>Sequence</code>”。</p>
+<ol>
+<li><p>Structure 视图将网络请求按访问的域名分类。</p>
+</li>
+<li><p>Sequence 视图将网络请求按访问的时间排序。</p>
+</li>
+</ol>
+<p><img src="9481801-0af79e9221fcd7ab.jpeg" alt=""></p>
+<h2 id="下面将一一介绍这些如何配置和使用"><a href="#下面将一一介绍这些如何配置和使用" class="headerlink" title="下面将一一介绍这些如何配置和使用"></a>下面将一一介绍这些如何配置和使用</h2><h3 id="一-将Charles设置成系统代理"><a href="#一-将Charles设置成系统代理" class="headerlink" title="一. 将Charles设置成系统代理"></a>一. 将Charles设置成系统代理</h3><p>Charles 是通过将自己设置成代理服务器来完成抓包的，勾选系统代理后，系统本地发出去的请求都能被截取下来。如果只抓取APP的包的话，可关闭此配置，这样不会出现太多的数据看着比较乱。</p>
+<p>Mac<br><img src="9481801-3cdbf83bf3b4de25.jpeg" alt=""></p>
+<p>Windows:<br><img src="9481801-c900ffa8c80eff3b.png" alt=""></p>
+<p>需要注意的是，Chrome 和 Firefox 浏览器默认并不使用系统的代理服务器设置，而 Charles</p>
+<p>是通过将自己设置成代理服务器来完成封包截取的，所以在默认情况下无法截取 Chrome 和 Firefox</p>
+<p>浏览器的网络通讯内容。如果你需要截取的话，在 Chrome 中设置成使用系统的代理服务器设置即可，或者直接将代理服务器设置成</p>
+<p>127.0.0.1:8888 也可达到相同效果。</p>
+<h3 id="二-截取移动设备上的网络请求包"><a href="#二-截取移动设备上的网络请求包" class="headerlink" title="二. 截取移动设备上的网络请求包"></a>二. 截取移动设备上的网络请求包</h3><p>我们在调试移动APP时，需要抓取APP发送的数据包，首先进行设置，Proxy -&gt; Proxy Settings默认端口是8888，根据实际情况可修改。<br><img src="9481801-a1fb99097ae01f0b.jpeg" alt=""></p>
+<p>查看本机IP地址：Help -&gt; Local IP Addresses<br><img src="9481801-9750450dc0e8fc28.jpeg" alt=""></p>
+<p>然后配置手机代理：<br>IOS和Android配置差不多<br><img src="9481801-c225426989fd8940.jpeg" alt=""></p>
+<p>打开要调试的APP，请求就会先发送到Charles，然后验证是否允许访问。<br><img src="9481801-a483998d9f2ad243.png" alt=""></p>
+<p>当点击允许后，可以在Proxy -&gt; Access Control Settings里看到可以访问此代理服务器列表<br><img src="9481801-868d29d2ca72f58f.jpeg" alt=""></p>
+<p>注意</p>
+<p>如果不小心点击了拒绝，可以手动添加手机IP/Mac地址到允许访问列表，或者重启Charles，手机再次访问，会再次提示选择。</p>
+<p>如果不想每换一个手机都要进行验证，可以配置允许所有手机访问，加入</p>
+<p>0.0.0.0/0（IPv4）或::/0（IPv6）</p>
+<p>现在就可以抓包了，拿一款我们公司开发的乐视车联APP来做测试：</p>
+<p><img src="9481801-c737b281ba531794.jpeg" alt=""><br><img src="9481801-501f5b740103ff63.png" alt=""><br><img src="9481801-65d7822ad87d7999.jpeg" alt=""></p>
+<h3 id="三-过滤网络请求"><a href="#三-过滤网络请求" class="headerlink" title="三. 过滤网络请求"></a>三. 过滤网络请求</h3><p>通常情况下，网络请求是非常大量的，从几十个请求里找到我们需要的观察的某个请求比较费时，那么我们就需要对网络请求进行过滤，只监控向指定目录服务器上发送的请求。有两种方法：</p>
+<ol>
+<li><p>在Sequence界面的中部的Filter栏中填入需要过滤出来的关键字。例如我们的服务器的地址是：*.leautolink.com，那么只需要在Filter栏中填入leautolink即可。（一般用于临时过滤）<br><img src="9481801-ce5bad55f555b6c5.jpeg" alt=""></p>
+</li>
+<li><p>在Charles的菜单栏选择”Proxy”-&gt;”Recording Settings”，然后选择Include栏，选择添加一个项目，然后填入需要监控的协议，主机地址，端口号。这样就可以只截取目标网站的封包了。如下图所示：（固定过滤地址）<br><img src="9481801-aea3ac70e781e5db.jpeg" alt=""></p>
+</li>
+</ol>
+<h3 id="四-代理转发"><a href="#四-代理转发" class="headerlink" title="四. 代理转发"></a>四. 代理转发</h3><p>实际开发时，有这样的场景，服务端线上版本有bug，你在本地修改程序后，需要模拟实际的线上环境，来验证程序的正确性，最笨的方法就是让客户端修改一下APP的调用地址到你本机，然后重新打一个版本供你模拟测试，这样虽然可以，但每次遇到bug都要这么做的话，那效率极其低下，然而Charles为我们解决了这个问题。</p>
+<p>请求转发，把调用方调用的地址转发到你本机地址的程序进行执行。</p>
+<p>右键 -&gt; Map Remote …</p>
+<p><img src="9481801-ab923c98d9d4e42f.png" alt=""><br><img src="9481801-836ea6a168f45e35.jpeg" alt=""></p>
+<p>并且配置Tools -&gt; Map Romote<br><img src="9481801-d26e2b6b4d01efd7.jpeg" alt=""></p>
+<p>运行APP<br><img src="9481801-b09592f4a3dea32d.jpeg" alt=""></p>
+<h3 id="五-Https请求抓包"><a href="#五-Https请求抓包" class="headerlink" title="五. Https请求抓包"></a>五. Https请求抓包</h3><p>默认我们是看不到https的请求数据的。我们需要安装证书。<br><img src="9481801-a5b605dcd0f197f2.jpeg" alt=""></p>
+<p><img src="9481801-dd452e9dd2626781.jpeg" alt=""></p>
+<p>Mac:<br><img src="9481801-8035cd2b1d4571b8.jpeg" alt=""><br><img src="9481801-8c54f2bd53b3dc3d.jpeg" alt=""></p>
+<p>双击打开Charles Proxy CA<br><img src="9481801-12fb20e4bd437eb5.jpeg" alt=""><br><img src="9481801-685e062e709c52a7.jpeg" alt=""><br><img src="9481801-c4c8741157b01bc4.jpeg" alt=""></p>
+<p>手机配置完代理（必须的操作）后，浏览器打开<a href="http://chls.pro/ssl" target="_blank" rel="noopener">http://chls.pro/ssl</a><br><img src="9481801-eef693a2d540e4c8.png" alt=""><br><img src="9481801-fac0b0cded42b5e4.png" alt=""></p>
+<p>然后配置Proxy -&gt; SSL Proxying Settings… 添加要抓取的https请求<br><img src="9481801-e5ca0b0d6adf3eb6.png" alt=""></p>
+<p>然后再次请求：<br><img src="9481801-07d03bc720a6f07c.jpeg" alt=""></p>
+<p>如果不再使用Charles，想删除手机里的证书文件怎么删除呢？</p>
+<p>设置-&gt;通用-&gt;描述文件与设备管理，删除指定的证书即可<br><img src="9481801-ed49ee811f56cb4d.png" alt=""></p>
+<p>Windows:<br><img src="9481801-83ca4d92b802fa20.png" alt=""><br><img src="9481801-ccef60995473527a.png" alt=""></p>
+<p>下一步<br><img src="9481801-9073122482819867.png" alt=""></p>
+<p>然后继续下一步直到导入成功。<br><img src="9481801-12f83c1215cf5726.png" alt=""></p>
+<p>剩下的配置与Max下配置相同</p>
+<p><strong>SSL的问题：</strong><br>最近iPhone系统更新到ios</p>
+<p>10.3后,用Charles抓包竟然出现了一些问题,https的请求都会失败,提示错误信息为Failure SSLHandshake:</p>
+<p>Received fatal alert: unknown_ca 和You may need to configure your browser</p>
+<p>or application to trust the Charles Root Certificate.</p>
+<p>然而之前任何问题都没有,并且相关设置都正确:电脑上安装了Charles的根证书,并且设置了始终信任,然后手机上也登录了<a href="http://chls.pro/ssl安装了描述文件,一切都按正常程序走的,但是错误始终无法解决" target="_blank" rel="noopener">http://chls.pro/ssl安装了描述文件,一切都按正常程序走的,但是错误始终无法解决</a>.</p>
+<p>原因：<br>    虽然charles的根证书已经在安装列表中显示,但它是被关闭的。在iOS</p>
+<p>10.3之前,当你将安装一个自定义证书,iOS会默认信任,不需要进一步的设置。而iOS</p>
+<p>10.3之后,安装新的自定义证书默认是不受信任的。如果要信任已安装的自定义证书,需要手动打开开关以信任证书。</p>
+<p>解决：</p>
+<p>设置-&gt;通用-&gt;关于本机-&gt;证书信任设置-&gt; 找到charles proxy custom root certificate然后信任该证书即可.<br><img src="9481801-c22b2e1b4ad1a938.png" alt=""></p>
+<p><strong>Windows系统无法上网的问题</strong><br>在windows下，如果Charles没有正常关闭，或者系统重启后无法上网的问题，因为Charles做了系统代理，当上网的时候，首先先访问代理服务器，然后代理再去链接网络，这时候Charles是非正常关闭的，只要重新打开Charles即可上网正常，正常关闭Charles后同样没问题。</p>
+<p><strong>写给测试人员的</strong><br>另外抓包工具不只是开发人员独享的，任何一个参与项目的人都可以使用，测试工程师，运维，产品经理等等任何对技术感兴趣的人，尤其是测试工程师，在测试的过程中遇到问题，不是简单的bug记录员，而要做到问题的分析员，这才是真正的“工程师”，当bug真正的到开发这的时候，他拿到的是不仅仅是bug，包含了分析过程，分析的数据，甚至是解决方案。我觉得这才是标准工作方式。</p>
+<p>举个例子，现在是移动互联网时代，那么我们开发的客户端必然包括Android和IOS版本，同样的功能必然在不同的客户端都有实现，比如同样的功能Android能用，而IOS不能用，这时候对于测试人员来说，他可以简单的提个bug说某个功能Android能用，ISO不能用，请开发人员解决。这个问题应该给谁呢？IOS开发，是IOS缺少请求参数？服务端开发，是服务端缺少对IOS的兼容吗？为了能让问题解决，可能要写两个相同的bug发给不同的人，</p>
+<p>那我们开发看到这样的问题，首先重现问题，那么肯定要跟测试人再次沟通，问问当时的测试过程，然后模拟同样的数据进行复现。</p>
+<p>那么如果我们的测试工程师换一种工作方式呢？当遇到问题的时候，用抓包工具把数据抓下来，首先比较Android和IOS发送请求参数有什么不同，比较一下返回的数据有什么不同，如果请求参数不同，那么测试人员通过模拟工具，把缺少的参数加上，那么返回的数据是不是就正确了呢？如果参数相同，返回的数据不同，或者是参数相同，返回的数据相同，这样的话，问题就显而易见了，测试人员可以把抓取的数据提交给相应的开发人员，而开发人员完全可以去debug了。提高测试人员的自身技能，而又提高了解决问题的效率，何乐而不为？</p>
+<p>转发来自: <a href="https://www.jianshu.com/p/d0a5e6986445" target="_blank" rel="noopener">https://www.jianshu.com/p/d0a5e6986445</a></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="http://blog.shagle.cn/2019/09/26/charles/" title="charles" target="_blank" rel="external">http://blog.shagle.cn/2019/09/26/charles/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="/" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="/" target="_blank"><span class="text-dark">波哥</span><small class="ml-1x">Java Developer &amp; Designer</small></a></h3>
+        <div>个人简介。</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+      <div id="vcomments"></div>
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom="">
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2019/09/04/job-scheduler/" title="job_scheduler"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.png" alt="扫码支持" title="扫一扫">
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope="" itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/bogle-zhao" target="_blank" title="Github" data-toggle="tooltip" data-placement="top"><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="http://weibo.com/bogle-zhao" target="_blank" title="Weibo" data-toggle="tooltip" data-placement="top"><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="https://twitter.com/iwebued" target="_blank" title="Twitter" data-toggle="tooltip" data-placement="top"><i class="icon icon-twitter"></i></a></li>
+        
+        <li><a href="https://www.behance.net/cofess" target="_blank" title="Behance" data-toggle="tooltip" data-placement="top"><i class="icon icon-behance"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle="tooltip" data-placement="top"><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a href="https://github.com/cofess" target="_blank"> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av.js"></script>
+  <script src="//unpkg.com/valine"></script>
+  <script type="text/javascript">
+  var GUEST = ['nick', 'mail', 'link'];
+  var meta = 'nick,mail,link';
+  meta = meta.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#vcomments',
+    verify: true,
+    notify: false,
+    appId: 'Muwda2bDL8O5i5pKEdIpN23P-gzGzoHsz',
+    appKey: 'P9KEnaQt3ucxmcqtGKHStMHu',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: meta,
+    pageSize: '10' || 10,
+    visitor: true
+  });
+  </script>
+
+     
+
+
+
+
+
+
+
+</body>
+</html>
