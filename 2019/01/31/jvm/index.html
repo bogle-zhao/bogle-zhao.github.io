@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/232122525533262.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111541266546517.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111825528931093.png">
-<meta property="og:updated_time" content="2019-11-25T05:55:19.000Z">
+<meta property="og:updated_time" content="2019-11-25T07:48:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jvm">
 <meta name="twitter:description" content="概述Java虚拟机与程序的生命周期 一个运行时的Java虚拟机(JVM)负责运行一个Java程序。 当启动一个Java程序时，一个虚拟机实例诞生；当程序关闭退出，这个虚拟机实例也就随之消亡。 如果在同一台计算机上同时运行多个Java程序，将得到多个Java虚拟机实例，每个Java程序都运行于它自己的Java虚拟机实例中。  在如下几种情况下，Java虚拟机将结束生命周期：  1.执行了System">
@@ -437,7 +437,7 @@
 <li>连接又分为三个步骤：<ul>
 <li>-验证：确保被加载的类的正确性</li>
 <li>-准备：为类的<code>静态变量</code>分配内存，并将其初始化为<code>默认值</code></li>
-<li>-解析：<code>把类中的符号引用转换为直接引用</code><br>参见:<a href="#连接过程：验证、准备、解析">连接过程：验证、准备、解析</a><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2></li>
+<li>-解析：<code>把类中的符号引用转换为直接引用</code><br>参见:<a href="#连接过程：验证、准备、解析">连接过程：验证、准备、解析</a><h2 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3.初始化"></a>3.初始化</h2></li>
 </ul>
 </li>
 <li>为类的静态变量赋予正确的<code>初始值</code>，即在程序里为静态变量指定的初始值，或静态代码块中的赋值操作。</li>
@@ -640,7 +640,7 @@
 <p>loader1变量和obj变量间接应用代表Sample类的Class对象，而objClass变量则直接引用它。</p>
 <p>如果程序运行过程中，将上图左侧三个引用变量都置为null，此时Sample对象结束生命周期，MyClassLoader对象结束生命周期，代表Sample类的Class对象也结束生命周期，Sample类在方法区内的二进制数据<code>被卸载</code>。</p>
 <p>当再次有需要时，会检查Sample类的Class对象是否存在，<code>如果存在会直接使用，不再重新加载</code>；如果不存在Sample类会被重新加载，在Java虚拟机的堆区会生成一个新的代表Sample类的Class实例(可以通过哈希码查看是否是同一个实例)。</p>
-<h1 id="jvm参数"><a href="#jvm参数" class="headerlink" title="jvm参数"></a>jvm参数</h1><p>-XX:+TraceClassLoading,用于追踪类的加载信息并打印出来<br>–XX:+<option>,表示开启option选项<br>–XX:-</option><option>,表示关闭option选项<br>–XX:</option><option>=<value>,表示将option选项的值设置为value</value></option></p>
+<h1 id="jvm参数"><a href="#jvm参数" class="headerlink" title="jvm参数"></a>jvm参数</h1><p>–XX:+TraceClassLoading,用于追踪类的加载信息并打印出来<br>–XX:+<option>,表示开启option选项<br>–XX:-</option><option>,表示关闭option选项<br>–XX:</option><option>=<value>,表示将option选项的值设置为value</value></option></p>
 
       
     </div>
