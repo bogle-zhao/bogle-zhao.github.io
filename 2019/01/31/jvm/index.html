@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/232122525533262.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111541266546517.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111825528931093.png">
-<meta property="og:updated_time" content="2019-11-25T07:48:59.000Z">
+<meta property="og:updated_time" content="2019-11-27T01:59:42.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jvm">
 <meta name="twitter:description" content="概述Java虚拟机与程序的生命周期 一个运行时的Java虚拟机(JVM)负责运行一个Java程序。 当启动一个Java程序时，一个虚拟机实例诞生；当程序关闭退出，这个虚拟机实例也就随之消亡。 如果在同一台计算机上同时运行多个Java程序，将得到多个Java虚拟机实例，每个Java程序都运行于它自己的Java虚拟机实例中。  在如下几种情况下，Java虚拟机将结束生命周期：  1.执行了System">
@@ -437,9 +437,11 @@
 <li>连接又分为三个步骤：<ul>
 <li>-验证：确保被加载的类的正确性</li>
 <li>-准备：为类的<code>静态变量</code>分配内存，并将其初始化为<code>默认值</code></li>
-<li>-解析：<code>把类中的符号引用转换为直接引用</code><br>参见:<a href="#连接过程：验证、准备、解析">连接过程：验证、准备、解析</a><h2 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3.初始化"></a>3.初始化</h2></li>
+<li>-解析：<code>把类中的符号引用转换为直接引用</code><br>参见:<a href="#连接过程：验证、准备、解析">连接过程：验证、准备、解析</a></li>
 </ul>
 </li>
+</ul>
+<h2 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3.初始化"></a>3.初始化</h2><ul>
 <li>为类的静态变量赋予正确的<code>初始值</code>，即在程序里为静态变量指定的初始值，或静态代码块中的赋值操作。</li>
 <li>静态代码块是从上到下顺序执行的，可以对一个静态变量多次赋值，最后的结果为静态变量的初始值。</li>
 <li>参见<a href="#类的初始化">类的初始化</a></li>
@@ -529,10 +531,7 @@
 </ul>
 </li>
 <li>java虚拟机启动时被标明为类的类(java test)</li>
-<li>JDK 1.7 开始提供的动态语言支持：<br>java.lang.invoke.MethodHandle实例的解析结果REF_getStatic,REF_putStatic,REF_invokeStatic句柄对应的类没有初始化则初始化<ul>
-<li>java.lang.invoke.MethodHandle实例的解析结果REF_getStatic,REF_putStatic,REF_invokeStatic句柄对应的类没有初始化则初始化<br>除了以上七种情况，其他使用java类的方法都被看作是对类的<code>被动使用</code>，都不会导致类的<code>初始化</code></li>
-</ul>
-</li>
+<li>JDK 1.7 开始提供的动态语言支持：<br>java.lang.invoke.MethodHandle实例的解析结果REF_getStatic,REF_putStatic,REF_invokeStatic句柄对应的类没有初始化则初始化<br>除了以上七种情况，其他使用java类的方法都被看作是对类的<code>被动使用</code>，都不会导致类的<code>初始化</code></li>
 </ul>
 </li>
 <li>-被动使用<h2 id="接口的特殊性"><a href="#接口的特殊性" class="headerlink" title="接口的特殊性"></a>接口的特殊性</h2>当Java虚拟机初始化一个类时，要求它的所有父类都已经被初始化，但是这条规则并不适用于接口</li>
