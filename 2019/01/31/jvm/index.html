@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/232122525533262.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111541266546517.png">
 <meta property="og:image" content="http://blog.shagle.cn/2019/01/31/jvm/111825528931093.png">
-<meta property="og:updated_time" content="2019-11-27T01:59:42.000Z">
+<meta property="og:updated_time" content="2019-11-27T09:11:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jvm">
 <meta name="twitter:description" content="概述Java虚拟机与程序的生命周期 一个运行时的Java虚拟机(JVM)负责运行一个Java程序。 当启动一个Java程序时，一个虚拟机实例诞生；当程序关闭退出，这个虚拟机实例也就随之消亡。 如果在同一台计算机上同时运行多个Java程序，将得到多个Java虚拟机实例，每个Java程序都运行于它自己的Java虚拟机实例中。  在如下几种情况下，Java虚拟机将结束生命周期：  1.执行了System">
@@ -256,7 +256,7 @@
   <div class="widget">
     <h3 class="widget-title">归档</h3>
     <div class="widget-body">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">34</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a><span class="archive-list-count">8</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a><span class="archive-list-count">34</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a><span class="archive-list-count">49</span></li></ul>
     </div>
   </div>
 
@@ -268,6 +268,21 @@
     <div class="widget-body">
       <ul class="recent-post-list list-unstyled no-thumbnail">
         
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                
+              </p>
+              <p class="item-title">
+                <a href="/2019/12/13/风叶/" class="title">风叶</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2019-12-13T06:14:26.000Z" itemprop="datePublished">2019-12-13</time>
+              </p>
+            </div>
+          </li>
+          
           <li>
             
             <div class="item-inner">
@@ -324,21 +339,6 @@
               </p>
               <p class="item-date">
                 <time datetime="2019-08-01T14:06:12.000Z" itemprop="datePublished">2019-08-01</time>
-              </p>
-            </div>
-          </li>
-          
-          <li>
-            
-            <div class="item-inner">
-              <p class="item-category">
-                <a class="category-link" href="/categories/Java性能调优实战/">Java性能调优实战</a>
-              </p>
-              <p class="item-title">
-                <a href="/2019/07/16/Java性能调优实战-04-慎重使用正则表达式/" class="title">Java性能调优实战 04 慎重使用正则表达式</a>
-              </p>
-              <p class="item-date">
-                <time datetime="2019-07-16T03:13:19.000Z" itemprop="datePublished">2019-07-16</time>
               </p>
             </div>
           </li>
@@ -554,9 +554,12 @@
 </ul>
 </li>
 <li>用户自定义的类加载器<ul>
-<li>java.lang.ClassLoader的子类, 用户可以定制类的加载方式<h2 id="JVM自带的加载器"><a href="#JVM自带的加载器" class="headerlink" title="JVM自带的加载器"></a>JVM自带的加载器</h2>Java虚拟机自带了以下几种加载器。</li>
+<li>java.lang.ClassLoader的子类, 用户可以定制类的加载方式</li>
 </ul>
 </li>
+</ul>
+<h2 id="JVM自带的加载器"><a href="#JVM自带的加载器" class="headerlink" title="JVM自带的加载器"></a>JVM自带的加载器</h2><p>Java虚拟机自带了以下几种加载器。</p>
+<ul>
 <li><p><strong>1.根(Bootstrap)类加载器：</strong><br>该加载器没有<code>父加载器</code>。<br>它负责加载虚拟机的核心类库，如java.lang.*等。<br>根类加载器从系统属性sun.boot.class.path所指定的目录中加载类库。<br>根类加载器的实现依赖于底层操作系统，属于虚拟机的实现的一部分，它并没有继承<code>java.lang.ClassLoader</code>类，它是用C++写的。</p>
 </li>
 <li><p><strong>2.扩展(Extension)类加载器：</strong><br><code>它的父加载器为根类加载器。</code><br>它从<code>java.ext.dirs</code>系统属性所指定的目录中加载类库，或者从JDK的安装目录的<code>jre\lib\ext</code>子目录(扩展目录)下加载类库，如果把用户创建的JAR文件放在这个目录下，也会自动由扩展类加载器加载。<br>扩展类加载器是纯Java类，是<code>java.lang.ClassLoader</code>类的子类。</p>
